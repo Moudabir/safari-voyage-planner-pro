@@ -13,7 +13,7 @@ interface Attendee {
 
 interface Expense {
   id: string;
-  category: 'stay' | 'transport' | 'food' | 'emergency';
+  category: 'stay' | 'transport' | 'food' | 'emergency' | 'other';
   amount: number;
   description: string;
   date: string;
@@ -38,7 +38,8 @@ const categoryIcons = {
   stay: Home,
   transport: Car,
   food: UtensilsCrossed,
-  emergency: AlertTriangle
+  emergency: AlertTriangle,
+  other: Activity
 };
 
 export const TripSummary: React.FC<TripSummaryProps> = ({ attendees, expenses, schedule }) => {

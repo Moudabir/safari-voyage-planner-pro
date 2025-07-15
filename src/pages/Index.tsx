@@ -20,7 +20,7 @@ interface Attendee {
 
 interface Expense {
   id: string;
-  category: 'stay' | 'transport' | 'food' | 'emergency';
+  category: 'stay' | 'transport' | 'food' | 'emergency' | 'other';
   amount: number;
   description: string;
   date: string;

@@ -6,12 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Trash2, Plus, DollarSign, Home, Car, UtensilsCrossed, AlertTriangle } from "lucide-react";
+import { Trash2, Plus, DollarSign, Home, Car, UtensilsCrossed, AlertTriangle, Activity } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Expense {
   id: string;
-  category: 'stay' | 'transport' | 'food' | 'emergency';
+  category: 'stay' | 'transport' | 'food' | 'emergency' | 'other';
   amount: number;
   description: string;
   date: string;
@@ -26,20 +26,22 @@ const categoryIcons = {
   stay: Home,
   transport: Car,
   food: UtensilsCrossed,
-  emergency: AlertTriangle
+  emergency: AlertTriangle,
+  other: Activity
 };
 
 const categoryColors = {
   stay: "text-safari-green",
   transport: "text-safari-orange",
   food: "text-safari-brown",
-  emergency: "text-destructive"
+  emergency: "text-destructive",
+  other: "text-primary"
 };
 
 export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExpenses }) => {
   const [isAddingExpense, setIsAddingExpense] = useState(false);
   const [newExpense, setNewExpense] = useState<{
-    category: 'stay' | 'transport' | 'food' | 'emergency';
+    category: 'stay' | 'transport' | 'food' | 'emergency' | 'other';
     amount: string;
     description: string;
     date: string;
@@ -116,7 +118,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
             <div className="space-y-4">
               <div>
                 <Label htmlFor="category">Category</Label>
-                <Select value={newExpense.category} onValueChange={(value: 'stay' | 'transport' | 'food' | 'emergency') => 
+                <Select value={newExpense.category} onValueChange={(value: 'stay' | 'transport' | 'food' | 'emergency' | 'other') => 
                   setNewExpense({...newExpense, category: value})
                 }>
                   <SelectTrigger>
@@ -127,6 +129,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
                     <SelectItem value="transport">Transport</SelectItem>
                     <SelectItem value="food">Food</SelectItem>
                     <SelectItem value="emergency">Emergency Fund</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -167,12 +170,12 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
       </div>
 
       {/* Category Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {Object.entries(categoryIcons).map(([category, Icon]) => (
           <Card key={category} className="border-safari-sand bg-gradient-to-br from-card to-safari-cream">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium capitalize">
-                {category === 'stay' ? 'Place of Stay' : category}
+                {category === 'stay' ? 'Place of Stay' : category === 'other' ? 'Other' : category}
               </CardTitle>
               <Icon className={`h-4 w-4 ${categoryColors[category as keyof typeof categoryColors]}`} />
             </CardHeader>
@@ -223,7 +226,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
                       <div>
                         <p className="font-medium">{expense.description}</p>
                         <p className="text-sm text-muted-foreground">
-                          {expense.category === 'stay' ? 'Place of Stay' : expense.category} • {expense.date}
+                          {expense.category === 'stay' ? 'Place of Stay' : expense.category === 'other' ? 'Other' : expense.category} • {expense.date}
                         </p>
                       </div>
                     </div>
