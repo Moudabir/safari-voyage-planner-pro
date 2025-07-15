@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Users, DollarSign, Calendar, MapPin, Clock, Activity, Check, X, Home, Car, UtensilsCrossed, AlertTriangle } from "lucide-react";
+import { Users, Banknote, Calendar, MapPin, Clock, Activity, Check, X, Home, Car, UtensilsCrossed, AlertTriangle } from "lucide-react";
 
 interface Attendee {
   id: string;
@@ -183,7 +183,7 @@ export const TripSummary: React.FC<TripSummaryProps> = ({ attendees, expenses, s
         <Card className="border-safari-sand">
           <CardHeader>
             <CardTitle className="text-safari-orange flex items-center">
-              <DollarSign className="h-5 w-5 mr-2" />
+              <Banknote className="h-5 w-5 mr-2" />
               Expenses
             </CardTitle>
           </CardHeader>
@@ -194,7 +194,7 @@ export const TripSummary: React.FC<TripSummaryProps> = ({ attendees, expenses, s
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span>Total:</span>
-                  <span className="font-bold text-safari-orange">${totalExpenses}</span>
+                  <span className="font-bold text-safari-orange">{totalExpenses} DH</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Transactions:</span>
@@ -202,7 +202,7 @@ export const TripSummary: React.FC<TripSummaryProps> = ({ attendees, expenses, s
                 </div>
                 <div className="flex justify-between">
                   <span>Average:</span>
-                  <span className="font-bold">${(totalExpenses / expenses.length).toFixed(2)}</span>
+                  <span className="font-bold">{(totalExpenses / expenses.length).toFixed(2)} DH</span>
                 </div>
                 <div className="mt-4 space-y-2">
                   {Object.entries(expensesByCategory).map(([category, amount]) => {
@@ -213,7 +213,7 @@ export const TripSummary: React.FC<TripSummaryProps> = ({ attendees, expenses, s
                           <Icon className="h-3 w-3 mr-1" />
                           <span className="capitalize">{category}</span>
                         </div>
-                        <span className="font-medium">${amount}</span>
+                        <span className="font-medium">{amount} DH</span>
                       </div>
                     );
                   })}
@@ -280,7 +280,7 @@ export const TripSummary: React.FC<TripSummaryProps> = ({ attendees, expenses, s
               <p className="text-xs text-muted-foreground">Add, confirm, or remove attendees</p>
             </div>
             <div className="text-center p-4 bg-safari-cream rounded-lg">
-              <DollarSign className="h-8 w-8 mx-auto text-safari-orange mb-2" />
+              <Banknote className="h-8 w-8 mx-auto text-safari-orange mb-2" />
               <p className="text-sm font-medium mb-1">Track Expenses</p>
               <p className="text-xs text-muted-foreground">Add expenses by category</p>
             </div>

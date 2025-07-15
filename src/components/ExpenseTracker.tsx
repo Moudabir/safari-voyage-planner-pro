@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Trash2, Plus, DollarSign, Home, Car, UtensilsCrossed, AlertTriangle, Activity } from "lucide-react";
+import { Trash2, Plus, Banknote, Home, Car, UtensilsCrossed, AlertTriangle, Activity } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Expense {
@@ -72,7 +72,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
       setIsAddingExpense(false);
       toast({
         title: "Expense Added",
-        description: `$${expense.amount} added to ${expense.category} expenses.`
+        description: `${expense.amount} DH added to ${expense.category} expenses.`
       });
     }
   };
@@ -82,7 +82,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
     setExpenses(expenses.filter(e => e.id !== id));
     toast({
       title: "Expense Removed",
-      description: `$${expense?.amount} expense removed from ${expense?.category}.`
+      description: `${expense?.amount} DH expense removed from ${expense?.category}.`
     });
   };
 
@@ -134,7 +134,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
                 </Select>
               </div>
               <div>
-                <Label htmlFor="amount">Amount ($)</Label>
+                <Label htmlFor="amount">Amount (DH)</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -181,7 +181,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
             </CardHeader>
             <CardContent>
               <div className={`text-2xl font-bold ${categoryColors[category as keyof typeof categoryColors]}`}>
-                ${getCategoryTotal(category as Expense['category'])}
+                {getCategoryTotal(category as Expense['category'])} DH
               </div>
               <p className="text-xs text-muted-foreground">
                 {expenses.filter(e => e.category === category).length} expenses
@@ -196,7 +196,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
         <Card className="border-safari-sand">
           <CardContent className="py-12">
             <div className="text-center">
-              <DollarSign className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <Banknote className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">No expenses tracked yet</h3>
               <p className="text-muted-foreground mb-4">
                 Start tracking your trip expenses by adding your first expense
@@ -232,7 +232,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
                     </div>
                     <div className="flex items-center space-x-2">
                       <span className={`text-lg font-bold ${categoryColors[expense.category]}`}>
-                        ${expense.amount}
+                        {expense.amount} DH
                       </span>
                       <Button
                         variant="ghost"
@@ -262,11 +262,11 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Total Expenses:</span>
-                  <span className="font-bold text-safari-orange">${totalExpenses}</span>
+                  <span className="font-bold text-safari-orange">{totalExpenses} DH</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Average per expense:</span>
-                  <span className="font-medium">${(totalExpenses / expenses.length).toFixed(2)}</span>
+                  <span className="font-medium">{(totalExpenses / expenses.length).toFixed(2)} DH</span>
                 </div>
               </div>
               <div className="space-y-2">
@@ -276,7 +276,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
                 </div>
                 <div className="flex justify-between">
                   <span>Largest expense:</span>
-                  <span className="font-medium">${Math.max(...expenses.map(e => e.amount))}</span>
+                  <span className="font-medium">{Math.max(...expenses.map(e => e.amount))} DH</span>
                 </div>
               </div>
             </div>

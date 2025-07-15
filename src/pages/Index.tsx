@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Users, DollarSign, Calendar, MapPin, Clock, Activity } from "lucide-react";
+import { Users, Banknote, Calendar, MapPin, Clock, Activity } from "lucide-react";
 import { AttendeeTracker } from "@/components/AttendeeTracker";
 import { ExpenseTracker } from "@/components/ExpenseTracker";
 import { ScheduleManager } from "@/components/ScheduleManager";
@@ -73,10 +73,10 @@ const Index = () => {
           <Card className="border-safari-sand bg-gradient-to-br from-card to-safari-cream">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
-              <DollarSign className="h-4 w-4 text-safari-orange" />
+              <Banknote className="h-4 w-4 text-safari-orange" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-safari-orange">${totalExpenses}</div>
+              <div className="text-2xl font-bold text-safari-orange">{totalExpenses} DH</div>
               <p className="text-xs text-muted-foreground">
                 {expenses.length} transactions
               </p>
@@ -220,7 +220,7 @@ const Index = () => {
                           <div key={expense.id} className="flex items-center space-x-3">
                             <div className="w-2 h-2 bg-safari-orange rounded-full" />
                             <span className="text-sm">
-                              ${expense.amount} added to {expense.category}
+                              {expense.amount} DH added to {expense.category}
                             </span>
                           </div>
                         ))}
