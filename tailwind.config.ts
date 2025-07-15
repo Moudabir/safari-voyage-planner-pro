@@ -61,7 +61,24 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				safari: {
+					orange: 'hsl(var(--safari-orange))',
+					green: 'hsl(var(--safari-green))',
+					brown: 'hsl(var(--safari-brown))',
+					sand: 'hsl(var(--safari-sand))',
+					cream: 'hsl(var(--safari-cream))'
 				}
+			},
+			backgroundImage: {
+				'gradient-safari': 'var(--gradient-safari)',
+				'gradient-sunset': 'var(--gradient-sunset)'
+			},
+			boxShadow: {
+				'safari': 'var(--shadow-safari)'
+			},
+			transitionProperty: {
+				'smooth': 'var(--transition-smooth)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
