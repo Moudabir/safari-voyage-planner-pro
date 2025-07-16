@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Users, Banknote, Calendar, MapPin, Clock, Activity, MessageCircle } from "lucide-react";
+import { Users, Banknote, Calendar, MapPin, Clock, Activity, MessageCircle, Download, Upload } from "lucide-react";
 import { AttendeeTracker } from "@/components/AttendeeTracker";
 import { ExpenseTracker } from "@/components/ExpenseTracker";
 import { ScheduleManager } from "@/components/ScheduleManager";
 import { TripSummary } from "@/components/TripSummary";
+import { useToast } from "@/hooks/use-toast";
 
 interface Attendee {
   id: string;
@@ -40,10 +41,161 @@ const Index = () => {
   const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+  const { toast } = useToast();
 
   const confirmedAttendees = attendees.filter(a => a.confirmed).length;
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
   const upcomingActivities = schedule.filter(item => new Date(item.date) >= new Date()).length;
+
+  // CSV Export Functions
+  const downloadCSV = (data: string, filename: string) => {
+    const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportToCSV = () => {
+    try {
+      // Export Attendees
+      const attendeesCSV = [
+        ['Type', 'Name', 'WhatsApp', 'Confirmed', 'Pickup Location'].join(','),
+        ...attendees.map(a => [
+          'attendee',
+          `"${a.name}"`,
+          `"${a.whatsapp}"`,
+          a.confirmed,
+          `"${a.pickupLocation}"`
+        ].join(','))
+      ].join('\n');
+
+      // Export Expenses
+      const expensesCSV = [
+        ['Type', 'Category', 'Amount', 'Description', 'Date'].join(','),
+        ...expenses.map(e => [
+          'expense',
+          e.category,
+          e.amount,
+          `"${e.description}"`,
+          e.date
+        ].join(','))
+      ].join('\n');
+
+      // Export Schedule
+      const scheduleCSV = [
+        ['Type', 'Title', 'Time', 'Date', 'Schedule Type', 'Location', 'Pictures'].join(','),
+        ...schedule.map(s => [
+          'schedule',
+          `"${s.title}"`,
+          s.time,
+          s.date,
+          s.type,
+          `"${s.location}"`,
+          `"${(s.pictures || []).join(';')}"`
+        ].join(','))
+      ].join('\n');
+
+      // Combine all data
+      const allData = [attendeesCSV, expensesCSV, scheduleCSV].join('\n');
+      downloadCSV(allData, 'safari-trip-data.csv');
+
+      toast({
+        title: "Data Exported",
+        description: "All trip data has been exported to CSV successfully."
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export data to CSV.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // CSV Import Functions
+  const parseCSV = (csvText: string) => {
+    const lines = csvText.split('\n').filter(line => line.trim());
+    const newAttendees: Attendee[] = [];
+    const newExpenses: Expense[] = [];
+    const newSchedule: ScheduleItem[] = [];
+
+    lines.forEach((line, index) => {
+      if (index === 0 || !line.trim()) return; // Skip headers and empty lines
+      
+      const values = line.split(',').map(val => val.replace(/^"/, '').replace(/"$/, ''));
+      const type = values[0];
+
+      try {
+        if (type === 'attendee' && values.length >= 5) {
+          newAttendees.push({
+            id: Date.now().toString() + Math.random(),
+            name: values[1],
+            whatsapp: values[2],
+            confirmed: values[3] === 'true',
+            pickupLocation: values[4]
+          });
+        } else if (type === 'expense' && values.length >= 5) {
+          newExpenses.push({
+            id: Date.now().toString() + Math.random(),
+            category: values[1] as 'stay' | 'transport' | 'food' | 'emergency' | 'other',
+            amount: parseFloat(values[2]) || 0,
+            description: values[3],
+            date: values[4]
+          });
+        } else if (type === 'schedule' && values.length >= 7) {
+          newSchedule.push({
+            id: Date.now().toString() + Math.random(),
+            title: values[1],
+            time: values[2],
+            date: values[3],
+            type: values[4] as 'gathering' | 'activity',
+            location: values[5],
+            pictures: values[6] ? values[6].split(';').filter(p => p.trim()) : []
+          });
+        }
+      } catch (error) {
+        console.warn(`Error parsing line ${index + 1}:`, line);
+      }
+    });
+
+    return { newAttendees, newExpenses, newSchedule };
+  };
+
+  const importFromCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const csvText = e.target?.result as string;
+        const { newAttendees, newExpenses, newSchedule } = parseCSV(csvText);
+
+        // Update state with imported data
+        setAttendees(prev => [...prev, ...newAttendees]);
+        setExpenses(prev => [...prev, ...newExpenses]);
+        setSchedule(prev => [...prev, ...newSchedule]);
+
+        toast({
+          title: "Data Imported",
+          description: `Imported ${newAttendees.length} attendees, ${newExpenses.length} expenses, and ${newSchedule.length} schedule items.`
+        });
+      } catch (error) {
+        toast({
+          title: "Import Failed",
+          description: "Failed to import CSV data. Please check the file format.",
+          variant: "destructive"
+        });
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; // Reset file input
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,13 +206,36 @@ const Index = () => {
             <h1 className="text-4xl font-bold mb-2">SAFARI</h1>
             <p className="text-lg opacity-90">Your Ultimate Travel Companion</p>
           </div>
-          <Button
-            onClick={() => window.open('https://wa.me/', '_blank')}
-            className="bg-white text-safari-green hover:bg-white/90 font-semibold"
-          >
-            <MessageCircle className="h-4 w-4 mr-2" />
-            Communication
-          </Button>
+          <div className="flex space-x-3">
+            <input
+              type="file"
+              accept=".csv"
+              onChange={importFromCSV}
+              style={{ display: 'none' }}
+              id="csv-import"
+            />
+            <Button
+              onClick={() => document.getElementById('csv-import')?.click()}
+              className="bg-white text-safari-green hover:bg-white/90 font-semibold"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Import CSV
+            </Button>
+            <Button
+              onClick={exportToCSV}
+              className="bg-white text-safari-green hover:bg-white/90 font-semibold"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+            <Button
+              onClick={() => window.open('https://wa.me/', '_blank')}
+              className="bg-white text-safari-green hover:bg-white/90 font-semibold"
+            >
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Communication
+            </Button>
+          </div>
         </div>
       </div>
 
