@@ -6,12 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Trash2, UserPlus, MapPin, Mail, Check, X } from "lucide-react";
+import { Trash2, UserPlus, MapPin, MessageCircle, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 interface Attendee {
   id: string;
   name: string;
-  email: string;
+  whatsapp: string;
   confirmed: boolean;
   pickupLocation: string;
 }
@@ -26,7 +26,7 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
   const [isAddingAttendee, setIsAddingAttendee] = useState(false);
   const [newAttendee, setNewAttendee] = useState({
     name: "",
-    email: "",
+    whatsapp: "",
     confirmed: false,
     pickupLocation: ""
   });
@@ -34,7 +34,7 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
     toast
   } = useToast();
   const handleAddAttendee = () => {
-    if (newAttendee.name && newAttendee.email) {
+    if (newAttendee.name && newAttendee.whatsapp) {
       const attendee: Attendee = {
         id: Date.now().toString(),
         ...newAttendee
@@ -42,7 +42,7 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
       setAttendees([...attendees, attendee]);
       setNewAttendee({
         name: "",
-        email: "",
+        whatsapp: "",
         confirmed: false,
         pickupLocation: ""
       });
@@ -102,10 +102,10 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
               })} />
               </div>
               <div>
-                <Label htmlFor="email">Contact</Label>
-                <Input id="email" type="email" placeholder="Enter email address" value={newAttendee.email} onChange={e => setNewAttendee({
+                <Label htmlFor="whatsapp">WhatsApp Number</Label>
+                <Input id="whatsapp" type="tel" placeholder="Enter WhatsApp number (e.g., +212123456789)" value={newAttendee.whatsapp} onChange={e => setNewAttendee({
                 ...newAttendee,
-                email: e.target.value
+                whatsapp: e.target.value
               })} />
               </div>
               <div>
@@ -168,8 +168,15 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
               <CardContent>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2 text-sm">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span className="truncate">{attendee.email}</span>
+                    <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                    <a 
+                      href={`https://wa.me/${attendee.whatsapp.replace(/[^0-9]/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="truncate text-safari-green hover:underline cursor-pointer"
+                    >
+                      {attendee.whatsapp}
+                    </a>
                   </div>
                   {attendee.pickupLocation && <div className="flex items-center space-x-2 text-sm">
                       <MapPin className="h-4 w-4 text-muted-foreground" />

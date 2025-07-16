@@ -6,7 +6,7 @@ import { Users, Banknote, Calendar, MapPin, Clock, Activity, Check, X, Home, Car
 interface Attendee {
   id: string;
   name: string;
-  email: string;
+  whatsapp: string;
   confirmed: boolean;
   pickupLocation: string;
 }

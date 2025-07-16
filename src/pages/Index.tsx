@@ -13,7 +13,7 @@ import { TripSummary } from "@/components/TripSummary";
 interface Attendee {
   id: string;
   name: string;
-  email: string;
+  whatsapp: string;
   confirmed: boolean;
   pickupLocation: string;
 }
