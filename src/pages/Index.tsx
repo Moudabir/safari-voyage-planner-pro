@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Users, Banknote, Calendar, MapPin, Clock, Activity } from "lucide-react";
+import { Users, Banknote, Calendar, MapPin, Clock, Activity, MessageCircle } from "lucide-react";
 import { AttendeeTracker } from "@/components/AttendeeTracker";
 import { ExpenseTracker } from "@/components/ExpenseTracker";
 import { ScheduleManager } from "@/components/ScheduleManager";
@@ -33,6 +33,7 @@ interface ScheduleItem {
   date: string;
   type: 'gathering' | 'activity';
   location: string;
+  pictures: string[];
 }
 
 const Index = () => {
@@ -48,9 +49,18 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-gradient-safari text-white p-6 shadow-safari">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">SAFARI</h1>
-          <p className="text-lg opacity-90">Your Ultimate Travel Companion</p>
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">SAFARI</h1>
+            <p className="text-lg opacity-90">Your Ultimate Travel Companion</p>
+          </div>
+          <Button
+            onClick={() => window.open('https://wa.me/', '_blank')}
+            className="bg-white text-safari-green hover:bg-white/90 font-semibold"
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Communication
+          </Button>
         </div>
       </div>
 

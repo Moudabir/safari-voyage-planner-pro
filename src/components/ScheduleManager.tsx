@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, Calendar, Clock, MapPin, Users, Activity } from "lucide-react";
+import { Trash2, Plus, Calendar, Clock, MapPin, Users, Activity, Camera, Image } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ScheduleItem {
@@ -17,6 +17,7 @@ interface ScheduleItem {
   date: string;
   type: 'gathering' | 'activity';
   location: string;
+  pictures: string[];
 }
 
 interface ScheduleManagerProps {
@@ -26,6 +27,8 @@ interface ScheduleManagerProps {
 
 export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ schedule, setSchedule }) => {
   const [isAddingItem, setIsAddingItem] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<ScheduleItem | null>(null);
+  const [isManagingPictures, setIsManagingPictures] = useState(false);
   const [newItem, setNewItem] = useState<{
     title: string;
     time: string;
@@ -49,7 +52,8 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ schedule, setS
         time: newItem.time,
         date: newItem.date,
         type: newItem.type,
-        location: newItem.location
+        location: newItem.location,
+        pictures: []
       };
       setSchedule([...schedule, item]);
       setNewItem({
@@ -73,6 +77,32 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ schedule, setS
     toast({
       title: "Schedule Item Removed",
       description: `${item?.title} has been removed from your schedule.`
+    });
+  };
+
+  const handleAddPicture = (itemId: string, pictureUrl: string) => {
+    const updatedSchedule = schedule.map(item => 
+      item.id === itemId 
+        ? { ...item, pictures: [...(item.pictures || []), pictureUrl] }
+        : item
+    );
+    setSchedule(updatedSchedule);
+    toast({
+      title: "Picture Added",
+      description: "Picture has been added to the schedule item."
+    });
+  };
+
+  const handleRemovePicture = (itemId: string, pictureIndex: number) => {
+    const updatedSchedule = schedule.map(item => 
+      item.id === itemId 
+        ? { ...item, pictures: item.pictures?.filter((_, index) => index !== pictureIndex) || [] }
+        : item
+    );
+    setSchedule(updatedSchedule);
+    toast({
+      title: "Picture Removed",
+      description: "Picture has been removed from the schedule item."
     });
   };
 
@@ -266,45 +296,84 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ schedule, setS
               <CardContent>
                 <div className="space-y-4">
                   {items.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-4 bg-safari-cream rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex flex-col items-center">
-                          <Clock className="h-4 w-4 text-safari-brown mb-1" />
-                          <span className="text-sm font-medium">{formatTime(item.time)}</span>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h3 className="font-semibold">{item.title}</h3>
-                            <Badge variant={item.type === 'gathering' ? 'default' : 'secondary'}>
-                              {item.type === 'gathering' ? (
-                                <>
-                                  <Users className="h-3 w-3 mr-1" />
-                                  Gathering
-                                </>
-                              ) : (
-                                <>
-                                  <Activity className="h-3 w-3 mr-1" />
-                                  Activity
-                                </>
-                              )}
-                            </Badge>
+                    <div key={item.id} className="p-4 bg-safari-cream rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex flex-col items-center">
+                            <Clock className="h-4 w-4 text-safari-brown mb-1" />
+                            <span className="text-sm font-medium">{formatTime(item.time)}</span>
                           </div>
-                          {item.location && (
-                            <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                              <MapPin className="h-3 w-3" />
-                              <span>{item.location}</span>
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <h3 className="font-semibold">{item.title}</h3>
+                              <Badge variant={item.type === 'gathering' ? 'default' : 'secondary'}>
+                                {item.type === 'gathering' ? (
+                                  <>
+                                    <Users className="h-3 w-3 mr-1" />
+                                    Gathering
+                                  </>
+                                ) : (
+                                  <>
+                                    <Activity className="h-3 w-3 mr-1" />
+                                    Activity
+                                  </>
+                                )}
+                              </Badge>
                             </div>
-                          )}
+                            {item.location && (
+                              <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                                <MapPin className="h-3 w-3" />
+                                <span>{item.location}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedItem(item);
+                              setIsManagingPictures(true);
+                            }}
+                            className="text-safari-green hover:text-safari-green hover:bg-safari-green/10"
+                          >
+                            <Camera className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteItem(item.id)}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {item.pictures && item.pictures.length > 0 && (
+                        <div className="mt-3 pt-3 border-t">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Image className="h-4 w-4 text-safari-green" />
+                            <span className="text-sm font-medium">Pictures ({item.pictures.length})</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {item.pictures.slice(0, 3).map((picture, index) => (
+                              <div key={index} className="w-16 h-16 rounded-lg overflow-hidden bg-safari-sand">
+                                <img 
+                                  src={picture} 
+                                  alt={`${item.title} picture ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ))}
+                            {item.pictures.length > 3 && (
+                              <div className="w-16 h-16 rounded-lg bg-safari-sand flex items-center justify-center">
+                                <span className="text-xs text-safari-brown font-medium">+{item.pictures.length - 3}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -313,6 +382,72 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ schedule, setS
           ))}
         </div>
       )}
+
+      {/* Picture Management Dialog */}
+      <Dialog open={isManagingPictures} onOpenChange={setIsManagingPictures}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Manage Pictures - {selectedItem?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="picture-url">Add Picture URL</Label>
+              <div className="flex space-x-2">
+                <Input
+                  id="picture-url"
+                  placeholder="Enter image URL"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && selectedItem) {
+                      const url = (e.target as HTMLInputElement).value;
+                      if (url) {
+                        handleAddPicture(selectedItem.id, url);
+                        (e.target as HTMLInputElement).value = '';
+                      }
+                    }
+                  }}
+                />
+                <Button
+                  onClick={() => {
+                    const input = document.getElementById('picture-url') as HTMLInputElement;
+                    if (input.value && selectedItem) {
+                      handleAddPicture(selectedItem.id, input.value);
+                      input.value = '';
+                    }
+                  }}
+                  className="bg-safari-green hover:bg-safari-green/90"
+                >
+                  Add
+                </Button>
+              </div>
+            </div>
+            
+            {selectedItem?.pictures && selectedItem.pictures.length > 0 && (
+              <div>
+                <Label>Current Pictures</Label>
+                <div className="grid grid-cols-3 gap-4 mt-2">
+                  {selectedItem.pictures.map((picture, index) => (
+                    <div key={index} className="relative">
+                      <img 
+                        src={picture} 
+                        alt={`${selectedItem.title} picture ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-lg"
+                      />
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-1 right-1 h-6 w-6 p-0"
+                        onClick={() => handleRemovePicture(selectedItem.id, index)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
