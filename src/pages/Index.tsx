@@ -13,7 +13,6 @@ import { TripSummary } from "@/components/TripSummary";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useTrip } from "@/hooks/useTrip";
-
 interface Attendee {
   id: string;
   name: string;
@@ -23,7 +22,6 @@ interface Attendee {
   confirmed?: boolean;
   pickupLocation?: string;
 }
-
 interface Expense {
   id: string;
   category: 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'other';
@@ -32,7 +30,6 @@ interface Expense {
   paid_by: string;
   date?: string;
 }
-
 interface ScheduleItem {
   id: string;
   title: string;
@@ -42,44 +39,48 @@ interface ScheduleItem {
   location: string;
   pictures: string[];
 }
-
 const Index = () => {
   const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
-  const { toast } = useToast();
-  const { user, loading: authLoading, signOut } = useAuth();
-  const { currentTrip, loading: tripLoading } = useTrip();
+  const {
+    toast
+  } = useToast();
+  const {
+    user,
+    loading: authLoading,
+    signOut
+  } = useAuth();
+  const {
+    currentTrip,
+    loading: tripLoading
+  } = useTrip();
   const navigate = useNavigate();
-
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
     }
   }, [user, authLoading, navigate]);
-
   if (authLoading || tripLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+    return <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
           <p className="mt-4 text-muted-foreground">Loading your trip data...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (!user || !currentTrip) {
     return null;
   }
-
   const confirmedAttendees = attendees.filter(a => a.confirmed || true).length;
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
   const upcomingActivities = schedule.filter(item => new Date(item.date) >= new Date()).length;
 
   // CSV Export Functions
   const downloadCSV = (data: string, filename: string) => {
-    const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([data], {
+      type: 'text/csv;charset=utf-8;'
+    });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
@@ -89,51 +90,20 @@ const Index = () => {
     link.click();
     document.body.removeChild(link);
   };
-
   const exportToCSV = () => {
     try {
       // Export Attendees
-      const attendeesCSV = [
-        ['Type', 'Name', 'WhatsApp', 'Confirmed', 'Pickup Location'].join(','),
-        ...attendees.map(a => [
-          'attendee',
-          `"${a.name}"`,
-          `"${a.whatsapp}"`,
-          a.confirmed,
-          `"${a.pickupLocation}"`
-        ].join(','))
-      ].join('\n');
+      const attendeesCSV = [['Type', 'Name', 'WhatsApp', 'Confirmed', 'Pickup Location'].join(','), ...attendees.map(a => ['attendee', `"${a.name}"`, `"${a.whatsapp}"`, a.confirmed, `"${a.pickupLocation}"`].join(','))].join('\n');
 
       // Export Expenses
-      const expensesCSV = [
-        ['Type', 'Category', 'Amount', 'Description', 'Date'].join(','),
-        ...expenses.map(e => [
-          'expense',
-          e.category,
-          e.amount,
-          `"${e.description}"`,
-          e.date
-        ].join(','))
-      ].join('\n');
+      const expensesCSV = [['Type', 'Category', 'Amount', 'Description', 'Date'].join(','), ...expenses.map(e => ['expense', e.category, e.amount, `"${e.description}"`, e.date].join(','))].join('\n');
 
       // Export Schedule
-      const scheduleCSV = [
-        ['Type', 'Title', 'Time', 'Date', 'Schedule Type', 'Location', 'Pictures'].join(','),
-        ...schedule.map(s => [
-          'schedule',
-          `"${s.title}"`,
-          s.time,
-          s.date,
-          s.type,
-          `"${s.location}"`,
-          `"${(s.pictures || []).join(';')}"`
-        ].join(','))
-      ].join('\n');
+      const scheduleCSV = [['Type', 'Title', 'Time', 'Date', 'Schedule Type', 'Location', 'Pictures'].join(','), ...schedule.map(s => ['schedule', `"${s.title}"`, s.time, s.date, s.type, `"${s.location}"`, `"${(s.pictures || []).join(';')}"`].join(','))].join('\n');
 
       // Combine all data
       const allData = [attendeesCSV, expensesCSV, scheduleCSV].join('\n');
       downloadCSV(allData, 'safari-trip-data.csv');
-
       toast({
         title: "Data Exported",
         description: "All trip data has been exported to CSV successfully."
@@ -153,13 +123,11 @@ const Index = () => {
     const newAttendees: Attendee[] = [];
     const newExpenses: Expense[] = [];
     const newSchedule: ScheduleItem[] = [];
-
     lines.forEach((line, index) => {
       if (index === 0 || !line.trim()) return; // Skip headers and empty lines
-      
+
       const values = line.split(',').map(val => val.replace(/^"/, '').replace(/"$/, ''));
       const type = values[0];
-
       try {
         if (type === 'attendee' && values.length >= 5) {
           newAttendees.push({
@@ -195,25 +163,29 @@ const Index = () => {
         console.warn(`Error parsing line ${index + 1}:`, line);
       }
     });
-
-    return { newAttendees, newExpenses, newSchedule };
+    return {
+      newAttendees,
+      newExpenses,
+      newSchedule
+    };
   };
-
   const importFromCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       try {
         const csvText = e.target?.result as string;
-        const { newAttendees, newExpenses, newSchedule } = parseCSV(csvText);
+        const {
+          newAttendees,
+          newExpenses,
+          newSchedule
+        } = parseCSV(csvText);
 
         // Update state with imported data
         setAttendees(prev => [...prev, ...newAttendees]);
         setExpenses(prev => [...prev, ...newExpenses]);
         setSchedule(prev => [...prev, ...newSchedule]);
-
         toast({
           title: "Data Imported",
           description: `Imported ${newAttendees.length} attendees, ${newExpenses.length} expenses, and ${newSchedule.length} schedule items.`
@@ -229,9 +201,7 @@ const Index = () => {
     reader.readAsText(file);
     event.target.value = ''; // Reset file input
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-gradient-safari text-white p-6 shadow-safari">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -241,38 +211,19 @@ const Index = () => {
             <p className="text-sm opacity-75">Welcome back, {user.email}</p>
           </div>
           <div className="flex space-x-3">
-            <input
-              type="file"
-              accept=".csv"
-              onChange={importFromCSV}
-              style={{ display: 'none' }}
-              id="csv-import"
-            />
-            <Button
-              onClick={() => document.getElementById('csv-import')?.click()}
-              className="bg-white text-safari-green hover:bg-white/90 font-semibold"
-            >
+            <input type="file" accept=".csv" onChange={importFromCSV} style={{
+            display: 'none'
+          }} id="csv-import" />
+            <Button onClick={() => document.getElementById('csv-import')?.click()} className="bg-white text-safari-green hover:bg-white/90 font-semibold">
               <Upload className="h-4 w-4 mr-2" />
               Import CSV
             </Button>
-            <Button
-              onClick={exportToCSV}
-              className="bg-white text-safari-green hover:bg-white/90 font-semibold"
-            >
+            <Button onClick={exportToCSV} className="bg-white text-safari-green hover:bg-white/90 font-semibold">
               <Download className="h-4 w-4 mr-2" />
               Export CSV
             </Button>
-            <Button
-              onClick={() => window.open('https://wa.me/', '_blank')}
-              className="bg-white text-safari-green hover:bg-white/90 font-semibold"
-            >
-              <MessageCircle className="h-4 w-4 mr-2" />
-              Communication
-            </Button>
-            <Button
-              onClick={signOut}
-              className="bg-white text-safari-green hover:bg-white/90 font-semibold"
-            >
+            
+            <Button onClick={signOut} className="bg-white text-safari-green hover:bg-white/90 font-semibold">
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
@@ -359,35 +310,19 @@ const Index = () => {
           </TabsList>
 
           <TabsContent value="summary" className="mt-6">
-            <TripSummary 
-              attendees={attendees}
-              expenses={expenses}
-              schedule={schedule}
-            />
+            <TripSummary attendees={attendees} expenses={expenses} schedule={schedule} />
           </TabsContent>
 
           <TabsContent value="attendees" className="mt-6">
-            <AttendeeTracker 
-              attendees={attendees}
-              setAttendees={setAttendees}
-              tripId={currentTrip.id}
-            />
+            <AttendeeTracker attendees={attendees} setAttendees={setAttendees} tripId={currentTrip.id} />
           </TabsContent>
 
           <TabsContent value="expenses" className="mt-6">
-            <ExpenseTracker 
-              expenses={expenses}
-              setExpenses={setExpenses}
-              tripId={currentTrip.id}
-            />
+            <ExpenseTracker expenses={expenses} setExpenses={setExpenses} tripId={currentTrip.id} />
           </TabsContent>
 
           <TabsContent value="schedule" className="mt-6">
-            <ScheduleManager 
-              schedule={schedule}
-              setSchedule={setSchedule}
-              tripId={currentTrip.id}
-            />
+            <ScheduleManager schedule={schedule} setSchedule={setSchedule} tripId={currentTrip.id} />
           </TabsContent>
 
           <TabsContent value="overview" className="mt-6">
@@ -404,10 +339,7 @@ const Index = () => {
                         {confirmedAttendees}/{attendees.length}
                       </span>
                     </div>
-                    <Progress 
-                      value={attendees.length > 0 ? (confirmedAttendees / attendees.length) * 100 : 0} 
-                      className="h-2"
-                    />
+                    <Progress value={attendees.length > 0 ? confirmedAttendees / attendees.length * 100 : 0} className="h-2" />
                   </div>
                   <div>
                     <div className="flex justify-between mb-2">
@@ -416,10 +348,7 @@ const Index = () => {
                         {schedule.length}/10 planned
                       </span>
                     </div>
-                    <Progress 
-                      value={(schedule.length / 10) * 100} 
-                      className="h-2"
-                    />
+                    <Progress value={schedule.length / 10 * 100} className="h-2" />
                   </div>
                 </CardContent>
               </Card>
@@ -430,31 +359,23 @@ const Index = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {attendees.length === 0 && expenses.length === 0 && schedule.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-4">
+                    {attendees.length === 0 && expenses.length === 0 && schedule.length === 0 ? <p className="text-muted-foreground text-center py-4">
                         No recent activity. Start by adding attendees!
-                      </p>
-                    ) : (
-                      <>
-                        {attendees.slice(0, 3).map((attendee) => (
-                          <div key={attendee.id} className="flex items-center space-x-3">
+                      </p> : <>
+                        {attendees.slice(0, 3).map(attendee => <div key={attendee.id} className="flex items-center space-x-3">
                             <div className="w-2 h-2 bg-safari-green rounded-full" />
                             <span className="text-sm">{attendee.name} joined the trip</span>
                             <Badge variant={attendee.confirmed ? "default" : "secondary"}>
                               {attendee.confirmed ? "Confirmed" : "Pending"}
                             </Badge>
-                          </div>
-                        ))}
-                        {expenses.slice(0, 2).map((expense) => (
-                          <div key={expense.id} className="flex items-center space-x-3">
+                          </div>)}
+                        {expenses.slice(0, 2).map(expense => <div key={expense.id} className="flex items-center space-x-3">
                             <div className="w-2 h-2 bg-safari-orange rounded-full" />
                             <span className="text-sm">
                               {expense.amount} DH added to {expense.category}
                             </span>
-                          </div>
-                        ))}
-                      </>
-                    )}
+                          </div>)}
+                      </>}
                   </div>
                 </CardContent>
               </Card>
@@ -462,8 +383,6 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
