@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,82 +8,178 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2, Plus, Banknote, Home, Car, UtensilsCrossed, AlertTriangle, Activity } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Expense {
   id: string;
-  category: 'stay' | 'transport' | 'food' | 'emergency' | 'other';
+  category: 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'other';
   amount: number;
   description: string;
-  date: string;
+  paid_by: string;
+  date?: string;
 }
 
 interface ExpenseTrackerProps {
   expenses: Expense[];
   setExpenses: (expenses: Expense[]) => void;
+  tripId: string;
 }
 
 const categoryIcons = {
-  stay: Home,
-  transport: Car,
   food: UtensilsCrossed,
-  emergency: AlertTriangle,
+  transport: Car,
+  accommodation: Home,
+  entertainment: Activity,
+  shopping: Banknote,
   other: Activity
 };
 
 const categoryColors = {
-  stay: "text-safari-green",
-  transport: "text-safari-orange",
   food: "text-safari-brown",
-  emergency: "text-destructive",
-  other: "text-primary"
+  transport: "text-safari-orange",
+  accommodation: "text-safari-green",
+  entertainment: "text-primary",
+  shopping: "text-safari-sand",
+  other: "text-muted-foreground"
 };
 
-export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExpenses }) => {
+export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ 
+  expenses, 
+  setExpenses, 
+  tripId 
+}) => {
   const [isAddingExpense, setIsAddingExpense] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [newExpense, setNewExpense] = useState<{
-    category: 'stay' | 'transport' | 'food' | 'emergency' | 'other';
+    category: 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'other';
     amount: string;
     description: string;
-    date: string;
+    paid_by: string;
   }>({
-    category: 'stay',
+    category: 'food',
     amount: '',
     description: '',
-    date: new Date().toISOString().split('T')[0]
+    paid_by: ''
   });
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  const handleAddExpense = () => {
-    if (newExpense.amount && newExpense.description) {
-      const expense: Expense = {
-        id: Date.now().toString(),
-        category: newExpense.category,
-        amount: parseFloat(newExpense.amount),
-        description: newExpense.description,
-        date: newExpense.date
+  useEffect(() => {
+    if (tripId && user) {
+      loadExpenses();
+    }
+  }, [tripId, user]);
+
+  const loadExpenses = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('expenses')
+        .select('*')
+        .eq('trip_id', tripId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedExpenses = data.map(expense => ({
+        id: expense.id,
+        category: expense.category as 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'other',
+        amount: expense.amount,
+        description: expense.description,
+        paid_by: expense.paid_by,
+        date: expense.created_at.split('T')[0]
+      }));
+
+      setExpenses(formattedExpenses);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to load expenses",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddExpense = async () => {
+    if (!newExpense.amount || !newExpense.description || !newExpense.paid_by || !user) return;
+
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('expenses')
+        .insert([
+          {
+            trip_id: tripId,
+            user_id: user.id,
+            category: newExpense.category,
+            amount: parseFloat(newExpense.amount),
+            description: newExpense.description,
+            paid_by: newExpense.paid_by
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newExpenseFormatted = {
+        id: data.id,
+        category: data.category as 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'other',
+        amount: data.amount,
+        description: data.description,
+        paid_by: data.paid_by,
+        date: data.created_at.split('T')[0]
       };
-      setExpenses([...expenses, expense]);
+
+      setExpenses([newExpenseFormatted, ...expenses]);
       setNewExpense({
-        category: 'stay',
+        category: 'food',
         amount: '',
         description: '',
-        date: new Date().toISOString().split('T')[0]
+        paid_by: ''
       });
       setIsAddingExpense(false);
       toast({
         title: "Expense Added",
-        description: `${expense.amount} DH added to ${expense.category} expenses.`
+        description: `${data.amount} DH added to ${data.category} expenses.`
       });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDeleteExpense = (id: string) => {
+  const handleDeleteExpense = async (id: string) => {
     const expense = expenses.find(e => e.id === id);
-    setExpenses(expenses.filter(e => e.id !== id));
-    toast({
-      title: "Expense Removed",
-      description: `${expense?.amount} DH expense removed from ${expense?.category}.`
-    });
+    
+    try {
+      const { error } = await supabase
+        .from('expenses')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setExpenses(expenses.filter(e => e.id !== id));
+      toast({
+        title: "Expense Removed",
+        description: `${expense?.amount} DH expense removed from ${expense?.category}.`
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to remove expense",
+        variant: "destructive",
+      });
+    }
   };
 
   const getCategoryTotal = (category: Expense['category']) => {
@@ -93,6 +189,14 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
   };
 
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+  if (loading && expenses.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -118,17 +222,18 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
             <div className="space-y-4">
               <div>
                 <Label htmlFor="category">Category</Label>
-                <Select value={newExpense.category} onValueChange={(value: 'stay' | 'transport' | 'food' | 'emergency' | 'other') => 
+                <Select value={newExpense.category} onValueChange={(value: 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'other') => 
                   setNewExpense({...newExpense, category: value})
                 }>
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="stay">Place of Stay</SelectItem>
-                    <SelectItem value="transport">Transport</SelectItem>
                     <SelectItem value="food">Food</SelectItem>
-                    <SelectItem value="emergency">Emergency Fund</SelectItem>
+                    <SelectItem value="transport">Transport</SelectItem>
+                    <SelectItem value="accommodation">Accommodation</SelectItem>
+                    <SelectItem value="entertainment">Entertainment</SelectItem>
+                    <SelectItem value="shopping">Shopping</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
@@ -153,16 +258,20 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
                 />
               </div>
               <div>
-                <Label htmlFor="date">Date</Label>
+                <Label htmlFor="paid_by">Paid By</Label>
                 <Input
-                  id="date"
-                  type="date"
-                  value={newExpense.date}
-                  onChange={(e) => setNewExpense({...newExpense, date: e.target.value})}
+                  id="paid_by"
+                  placeholder="Who paid for this?"
+                  value={newExpense.paid_by}
+                  onChange={(e) => setNewExpense({...newExpense, paid_by: e.target.value})}
                 />
               </div>
-              <Button onClick={handleAddExpense} className="w-full bg-safari-orange hover:bg-safari-orange/90">
-                Add Expense
+              <Button 
+                onClick={handleAddExpense} 
+                className="w-full bg-safari-orange hover:bg-safari-orange/90"
+                disabled={loading}
+              >
+                {loading ? "Adding..." : "Add Expense"}
               </Button>
             </div>
           </DialogContent>
@@ -170,12 +279,12 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
       </div>
 
       {/* Category Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {Object.entries(categoryIcons).map(([category, Icon]) => (
           <Card key={category} className="border-safari-sand bg-gradient-to-br from-card to-safari-cream">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium capitalize">
-                {category === 'stay' ? 'Place of Stay' : category === 'other' ? 'Other' : category}
+                {category}
               </CardTitle>
               <Icon className={`h-4 w-4 ${categoryColors[category as keyof typeof categoryColors]}`} />
             </CardHeader>
@@ -226,7 +335,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ expenses, setExp
                       <div>
                         <p className="font-medium">{expense.description}</p>
                         <p className="text-sm text-muted-foreground">
-                          {expense.category === 'stay' ? 'Place of Stay' : expense.category === 'other' ? 'Other' : expense.category} • {expense.date}
+                          {expense.category} • Paid by {expense.paid_by} • {expense.date}
                         </p>
                       </div>
                     </div>

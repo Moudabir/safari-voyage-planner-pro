@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Plus, Calendar, Clock, MapPin, Users, Activity, Camera, Image } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ScheduleItem {
   id: string;
@@ -23,12 +25,18 @@ interface ScheduleItem {
 interface ScheduleManagerProps {
   schedule: ScheduleItem[];
   setSchedule: (schedule: ScheduleItem[]) => void;
+  tripId: string;
 }
 
-export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ schedule, setSchedule }) => {
+export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ 
+  schedule, 
+  setSchedule, 
+  tripId 
+}) => {
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ScheduleItem | null>(null);
   const [isManagingPictures, setIsManagingPictures] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [newItem, setNewItem] = useState<{
     title: string;
     time: string;
@@ -43,19 +51,81 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ schedule, setS
     location: ''
   });
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  const handleAddItem = () => {
-    if (newItem.title && newItem.time && newItem.date) {
-      const item: ScheduleItem = {
-        id: Date.now().toString(),
-        title: newItem.title,
-        time: newItem.time,
-        date: newItem.date,
+  useEffect(() => {
+    if (tripId && user) {
+      loadSchedule();
+    }
+  }, [tripId, user]);
+
+  const loadSchedule = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('schedule_items')
+        .select('*')
+        .eq('trip_id', tripId)
+        .order('date', { ascending: true });
+
+      if (error) throw error;
+
+      const formattedSchedule = data.map(item => ({
+        id: item.id,
+        title: item.title,
+        time: item.time || '',
+        date: item.date,
+        type: 'activity' as 'gathering' | 'activity', // Default to activity
+        location: item.description || '',
+        pictures: item.pictures || []
+      }));
+
+      setSchedule(formattedSchedule);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to load schedule",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddItem = async () => {
+    if (!newItem.title || !newItem.time || !newItem.date || !user) return;
+
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('schedule_items')
+        .insert([
+          {
+            trip_id: tripId,
+            user_id: user.id,
+            title: newItem.title,
+            date: newItem.date,
+            time: newItem.time,
+            description: newItem.location,
+            pictures: []
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newScheduleItem = {
+        id: data.id,
+        title: data.title,
+        time: data.time || '',
+        date: data.date,
         type: newItem.type,
-        location: newItem.location,
-        pictures: []
+        location: data.description || '',
+        pictures: data.pictures || []
       };
-      setSchedule([...schedule, item]);
+
+      setSchedule([...schedule, newScheduleItem]);
       setNewItem({
         title: '',
         time: '',
@@ -66,44 +136,108 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ schedule, setS
       setIsAddingItem(false);
       toast({
         title: "Schedule Item Added",
-        description: `${item.title} has been added to your schedule.`
+        description: `${data.title} has been added to your schedule.`
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteItem = async (id: string) => {
+    const item = schedule.find(s => s.id === id);
+    
+    try {
+      const { error } = await supabase
+        .from('schedule_items')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setSchedule(schedule.filter(s => s.id !== id));
+      toast({
+        title: "Schedule Item Removed",
+        description: `${item?.title} has been removed from your schedule.`
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to remove schedule item",
+        variant: "destructive",
       });
     }
   };
 
-  const handleDeleteItem = (id: string) => {
-    const item = schedule.find(s => s.id === id);
-    setSchedule(schedule.filter(s => s.id !== id));
-    toast({
-      title: "Schedule Item Removed",
-      description: `${item?.title} has been removed from your schedule.`
-    });
+  const handleAddPicture = async (itemId: string, pictureUrl: string) => {
+    try {
+      const item = schedule.find(s => s.id === itemId);
+      if (!item) return;
+
+      const updatedPictures = [...(item.pictures || []), pictureUrl];
+      
+      const { error } = await supabase
+        .from('schedule_items')
+        .update({ pictures: updatedPictures })
+        .eq('id', itemId);
+
+      if (error) throw error;
+
+      const updatedSchedule = schedule.map(scheduleItem => 
+        scheduleItem.id === itemId 
+          ? { ...scheduleItem, pictures: updatedPictures }
+          : scheduleItem
+      );
+      setSchedule(updatedSchedule);
+      toast({
+        title: "Picture Added",
+        description: "Picture has been added to the schedule item."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to add picture",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleAddPicture = (itemId: string, pictureUrl: string) => {
-    const updatedSchedule = schedule.map(item => 
-      item.id === itemId 
-        ? { ...item, pictures: [...(item.pictures || []), pictureUrl] }
-        : item
-    );
-    setSchedule(updatedSchedule);
-    toast({
-      title: "Picture Added",
-      description: "Picture has been added to the schedule item."
-    });
-  };
+  const handleRemovePicture = async (itemId: string, pictureIndex: number) => {
+    try {
+      const item = schedule.find(s => s.id === itemId);
+      if (!item) return;
 
-  const handleRemovePicture = (itemId: string, pictureIndex: number) => {
-    const updatedSchedule = schedule.map(item => 
-      item.id === itemId 
-        ? { ...item, pictures: item.pictures?.filter((_, index) => index !== pictureIndex) || [] }
-        : item
-    );
-    setSchedule(updatedSchedule);
-    toast({
-      title: "Picture Removed",
-      description: "Picture has been removed from the schedule item."
-    });
+      const updatedPictures = item.pictures?.filter((_, index) => index !== pictureIndex) || [];
+      
+      const { error } = await supabase
+        .from('schedule_items')
+        .update({ pictures: updatedPictures })
+        .eq('id', itemId);
+
+      if (error) throw error;
+
+      const updatedSchedule = schedule.map(scheduleItem => 
+        scheduleItem.id === itemId 
+          ? { ...scheduleItem, pictures: updatedPictures }
+          : scheduleItem
+      );
+      setSchedule(updatedSchedule);
+      toast({
+        title: "Picture Removed",
+        description: "Picture has been removed from the schedule item."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to remove picture",
+        variant: "destructive",
+      });
+    }
   };
 
   const sortedSchedule = [...schedule].sort((a, b) => {
@@ -117,6 +251,7 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ schedule, setS
   );
 
   const formatTime = (time: string) => {
+    if (!time) return '';
     return new Date(`2000-01-01T${time}`).toLocaleTimeString([], { 
       hour: '2-digit', 
       minute: '2-digit' 
@@ -140,6 +275,14 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ schedule, setS
     groups[date].push(item);
     return groups;
   }, {} as Record<string, ScheduleItem[]>);
+
+  if (loading && schedule.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -215,8 +358,12 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ schedule, setS
                   onChange={(e) => setNewItem({...newItem, location: e.target.value})}
                 />
               </div>
-              <Button onClick={handleAddItem} className="w-full bg-safari-brown hover:bg-safari-brown/90">
-                Add to Schedule
+              <Button 
+                onClick={handleAddItem} 
+                className="w-full bg-safari-brown hover:bg-safari-brown/90"
+                disabled={loading}
+              >
+                {loading ? "Adding..." : "Add to Schedule"}
               </Button>
             </div>
           </DialogContent>
@@ -438,7 +585,7 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ schedule, setS
                         className="absolute top-1 right-1 h-6 w-6 p-0"
                         onClick={() => handleRemovePicture(selectedItem.id, index)}
                       >
-                        <Trash2 className="h-3 w-3" />
+                        ×
                       </Button>
                     </div>
                   ))}

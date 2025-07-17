@@ -1,30 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Users, Banknote, Calendar, MapPin, Clock, Activity, MessageCircle, Download, Upload } from "lucide-react";
+import { Users, Banknote, Calendar, MapPin, Clock, Activity, MessageCircle, Download, Upload, LogOut } from "lucide-react";
 import { AttendeeTracker } from "@/components/AttendeeTracker";
 import { ExpenseTracker } from "@/components/ExpenseTracker";
 import { ScheduleManager } from "@/components/ScheduleManager";
 import { TripSummary } from "@/components/TripSummary";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useTrip } from "@/hooks/useTrip";
 
 interface Attendee {
   id: string;
   name: string;
-  whatsapp: string;
-  confirmed: boolean;
-  pickupLocation: string;
+  email: string;
+  phone: string;
+  whatsapp?: string;
+  confirmed?: boolean;
+  pickupLocation?: string;
 }
 
 interface Expense {
   id: string;
-  category: 'stay' | 'transport' | 'food' | 'emergency' | 'other';
+  category: 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'other';
   amount: number;
   description: string;
-  date: string;
+  paid_by: string;
+  date?: string;
 }
 
 interface ScheduleItem {
@@ -42,8 +48,32 @@ const Index = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const { toast } = useToast();
+  const { user, loading: authLoading, signOut } = useAuth();
+  const { currentTrip, loading: tripLoading } = useTrip();
+  const navigate = useNavigate();
 
-  const confirmedAttendees = attendees.filter(a => a.confirmed).length;
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth");
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || tripLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading your trip data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || !currentTrip) {
+    return null;
+  }
+
+  const confirmedAttendees = attendees.filter(a => a.confirmed || true).length;
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
   const upcomingActivities = schedule.filter(item => new Date(item.date) >= new Date()).length;
 
@@ -135,6 +165,8 @@ const Index = () => {
           newAttendees.push({
             id: Date.now().toString() + Math.random(),
             name: values[1],
+            email: values[2] || '',
+            phone: values[2] || '',
             whatsapp: values[2],
             confirmed: values[3] === 'true',
             pickupLocation: values[4]
@@ -142,9 +174,10 @@ const Index = () => {
         } else if (type === 'expense' && values.length >= 5) {
           newExpenses.push({
             id: Date.now().toString() + Math.random(),
-            category: values[1] as 'stay' | 'transport' | 'food' | 'emergency' | 'other',
+            category: values[1] as 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'other',
             amount: parseFloat(values[2]) || 0,
             description: values[3],
+            paid_by: 'Unknown',
             date: values[4]
           });
         } else if (type === 'schedule' && values.length >= 7) {
@@ -205,6 +238,7 @@ const Index = () => {
           <div>
             <h1 className="text-4xl font-bold mb-2">SAFARI</h1>
             <p className="text-lg opacity-90">Your Ultimate Travel Companion</p>
+            <p className="text-sm opacity-75">Welcome back, {user.email}</p>
           </div>
           <div className="flex space-x-3">
             <input
@@ -234,6 +268,13 @@ const Index = () => {
             >
               <MessageCircle className="h-4 w-4 mr-2" />
               Communication
+            </Button>
+            <Button
+              onClick={signOut}
+              className="bg-white text-safari-green hover:bg-white/90 font-semibold"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
             </Button>
           </div>
         </div>
@@ -329,6 +370,7 @@ const Index = () => {
             <AttendeeTracker 
               attendees={attendees}
               setAttendees={setAttendees}
+              tripId={currentTrip.id}
             />
           </TabsContent>
 
@@ -336,6 +378,7 @@ const Index = () => {
             <ExpenseTracker 
               expenses={expenses}
               setExpenses={setExpenses}
+              tripId={currentTrip.id}
             />
           </TabsContent>
 
@@ -343,6 +386,7 @@ const Index = () => {
             <ScheduleManager 
               schedule={schedule}
               setSchedule={setSchedule}
+              tripId={currentTrip.id}
             />
           </TabsContent>
 
