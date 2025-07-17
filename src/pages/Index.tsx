@@ -206,7 +206,7 @@ const Index = () => {
       <div className="bg-gradient-safari text-white p-6 shadow-safari">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div>
-            <h1 className="text-4xl font-bold mb-2">SAFARI</h1>
+            <h1 className="text-4xl font-bold mb-2">Safari</h1>
             <p className="text-lg opacity-90">Your Ultimate Travel Companion</p>
             <p className="text-sm opacity-75">Welcome back, {user.email}</p>
           </div>
