@@ -17,7 +17,9 @@ interface Expense {
   amount: number;
   description: string;
   paid_by: string;
-  date?: string;
+  trip_id: string;
+  user_id: string;
+  created_at: string;
 }
 
 interface ExpenseTrackerProps {
@@ -82,16 +84,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
 
       if (error) throw error;
 
-      const formattedExpenses = data.map(expense => ({
-        id: expense.id,
-        category: expense.category as 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'other',
-        amount: expense.amount,
-        description: expense.description,
-        paid_by: expense.paid_by,
-        date: expense.created_at.split('T')[0]
-      }));
-
-      setExpenses(formattedExpenses);
+      setExpenses(data);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -125,16 +118,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
 
       if (error) throw error;
 
-      const newExpenseFormatted = {
-        id: data.id,
-        category: data.category as 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'other',
-        amount: data.amount,
-        description: data.description,
-        paid_by: data.paid_by,
-        date: data.created_at.split('T')[0]
-      };
-
-      setExpenses([newExpenseFormatted, ...expenses]);
+      setExpenses([data, ...expenses]);
       setNewExpense({
         category: 'food',
         amount: '',
@@ -334,9 +318,9 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
                       <Icon className={`h-5 w-5 ${categoryColors[expense.category]}`} />
                       <div>
                         <p className="font-medium">{expense.description}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {expense.category} • Paid by {expense.paid_by} • {expense.date}
-                        </p>
+                         <p className="text-sm text-muted-foreground">
+                           {expense.category} • Paid by {expense.paid_by} • {expense.created_at.split('T')[0]}
+                         </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">

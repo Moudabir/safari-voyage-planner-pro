@@ -14,11 +14,11 @@ import { useAuth } from "@/hooks/useAuth";
 interface Attendee {
   id: string;
   name: string;
-  email: string;
-  phone: string;
-  whatsapp?: string;
-  confirmed?: boolean;
-  pickupLocation?: string;
+  email: string | null;
+  phone: string | null;
+  trip_id: string;
+  user_id: string;
+  created_at: string;
 }
 
 interface AttendeeTrackerProps {
@@ -61,17 +61,7 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
 
       if (error) throw error;
 
-      const formattedAttendees = data.map(attendee => ({
-        id: attendee.id,
-        name: attendee.name,
-        email: attendee.email || "",
-        phone: attendee.phone || "",
-        whatsapp: attendee.phone || "",
-        confirmed: true, // All stored attendees are confirmed
-        pickupLocation: ""
-      }));
-
-      setAttendees(formattedAttendees);
+      setAttendees(data);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -104,17 +94,7 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
 
       if (error) throw error;
 
-      const newAttendeeFormatted = {
-        id: data.id,
-        name: data.name,
-        email: data.email || "",
-        phone: data.phone || "",
-        whatsapp: data.phone || "",
-        confirmed: true,
-        pickupLocation: ""
-      };
-
-      setAttendees([...attendees, newAttendeeFormatted]);
+      setAttendees([...attendees, data]);
       setNewAttendee({
         name: "",
         email: "",
@@ -267,10 +247,10 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-lg">{attendee.name}</CardTitle>
-                    <Badge variant="default" className="mt-1">
-                      <Check className="h-3 w-3 mr-1" />
-                      Confirmed
-                    </Badge>
+                     <Badge variant="default" className="mt-1">
+                       <Check className="h-3 w-3 mr-1" />
+                       Confirmed
+                     </Badge>
                   </div>
                   <Button
                     variant="ghost"
@@ -291,17 +271,17 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
                     </div>
                   )}
                   {attendee.phone && (
-                    <div className="flex items-center space-x-2 text-sm">
-                      <MessageCircle className="h-4 w-4 text-muted-foreground" />
-                      <a 
-                        href={`https://wa.me/${attendee.phone.replace(/[^0-9]/g, '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="truncate text-safari-green hover:underline cursor-pointer"
-                      >
-                        {attendee.phone}
-                      </a>
-                    </div>
+                     <div className="flex items-center space-x-2 text-sm">
+                       <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                       <a 
+                         href={`https://wa.me/${attendee.phone?.replace(/[^0-9]/g, '') || ''}`}
+                         target="_blank"
+                         rel="noopener noreferrer"
+                         className="truncate text-safari-green hover:underline cursor-pointer"
+                       >
+                         {attendee.phone}
+                       </a>
+                     </div>
                   )}
                 </div>
               </CardContent>

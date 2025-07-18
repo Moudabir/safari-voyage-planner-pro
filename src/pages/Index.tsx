@@ -16,11 +16,11 @@ import { useTrip } from "@/hooks/useTrip";
 interface Attendee {
   id: string;
   name: string;
-  email: string;
-  phone: string;
-  whatsapp?: string;
-  confirmed?: boolean;
-  pickupLocation?: string;
+  email: string | null;
+  phone: string | null;
+  trip_id: string;
+  user_id: string;
+  created_at: string;
 }
 interface Expense {
   id: string;
@@ -28,7 +28,9 @@ interface Expense {
   amount: number;
   description: string;
   paid_by: string;
-  date?: string;
+  trip_id: string;
+  user_id: string;
+  created_at: string;
 }
 interface ScheduleItem {
   id: string;
@@ -72,7 +74,7 @@ const Index = () => {
   if (!user || !currentTrip) {
     return null;
   }
-  const confirmedAttendees = attendees.filter(a => a.confirmed || true).length;
+  const confirmedAttendees = attendees.length; // All stored attendees are considered confirmed
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
   const upcomingActivities = schedule.filter(item => new Date(item.date) >= new Date()).length;
 
@@ -93,10 +95,10 @@ const Index = () => {
   const exportToCSV = () => {
     try {
       // Export Attendees
-      const attendeesCSV = [['Type', 'Name', 'WhatsApp', 'Confirmed', 'Pickup Location'].join(','), ...attendees.map(a => ['attendee', `"${a.name}"`, `"${a.whatsapp}"`, a.confirmed, `"${a.pickupLocation}"`].join(','))].join('\n');
+      const attendeesCSV = [['Type', 'Name', 'Email', 'Phone'].join(','), ...attendees.map(a => ['attendee', `"${a.name}"`, `"${a.email || ''}"`, `"${a.phone || ''}"`].join(','))].join('\n');
 
       // Export Expenses
-      const expensesCSV = [['Type', 'Category', 'Amount', 'Description', 'Date'].join(','), ...expenses.map(e => ['expense', e.category, e.amount, `"${e.description}"`, e.date].join(','))].join('\n');
+      const expensesCSV = [['Type', 'Category', 'Amount', 'Description', 'Paid By', 'Date'].join(','), ...expenses.map(e => ['expense', e.category, e.amount, `"${e.description}"`, `"${e.paid_by}"`, e.created_at.split('T')[0]].join(','))].join('\n');
 
       // Export Schedule
       const scheduleCSV = [['Type', 'Title', 'Time', 'Date', 'Schedule Type', 'Location', 'Pictures'].join(','), ...schedule.map(s => ['schedule', `"${s.title}"`, s.time, s.date, s.type, `"${s.location}"`, `"${(s.pictures || []).join(';')}"`].join(','))].join('\n');
@@ -129,24 +131,26 @@ const Index = () => {
       const values = line.split(',').map(val => val.replace(/^"/, '').replace(/"$/, ''));
       const type = values[0];
       try {
-        if (type === 'attendee' && values.length >= 5) {
+        if (type === 'attendee' && values.length >= 4) {
           newAttendees.push({
             id: Date.now().toString() + Math.random(),
             name: values[1],
-            email: values[2] || '',
-            phone: values[2] || '',
-            whatsapp: values[2],
-            confirmed: values[3] === 'true',
-            pickupLocation: values[4]
+            email: values[2] || null,
+            phone: values[3] || null,
+            trip_id: currentTrip.id,
+            user_id: user.id,
+            created_at: new Date().toISOString()
           });
-        } else if (type === 'expense' && values.length >= 5) {
+        } else if (type === 'expense' && values.length >= 6) {
           newExpenses.push({
             id: Date.now().toString() + Math.random(),
             category: values[1] as 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'other',
             amount: parseFloat(values[2]) || 0,
             description: values[3],
-            paid_by: 'Unknown',
-            date: values[4]
+            paid_by: values[4] || 'Unknown',
+            trip_id: currentTrip.id,
+            user_id: user.id,
+            created_at: values[5] || new Date().toISOString()
           });
         } else if (type === 'schedule' && values.length >= 7) {
           newSchedule.push({
@@ -365,8 +369,8 @@ const Index = () => {
                         {attendees.slice(0, 3).map(attendee => <div key={attendee.id} className="flex items-center space-x-3">
                             <div className="w-2 h-2 bg-safari-green rounded-full" />
                             <span className="text-sm">{attendee.name} joined the trip</span>
-                            <Badge variant={attendee.confirmed ? "default" : "secondary"}>
-                              {attendee.confirmed ? "Confirmed" : "Pending"}
+                            <Badge variant="default">
+                              Confirmed
                             </Badge>
                           </div>)}
                         {expenses.slice(0, 2).map(expense => <div key={expense.id} className="flex items-center space-x-3">

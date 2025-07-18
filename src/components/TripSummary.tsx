@@ -6,17 +6,22 @@ import { Users, Banknote, Calendar, MapPin, Clock, Activity, Check, X, Home, Car
 interface Attendee {
   id: string;
   name: string;
-  whatsapp: string;
-  confirmed: boolean;
-  pickupLocation: string;
+  email: string | null;
+  phone: string | null;
+  trip_id: string;
+  user_id: string;
+  created_at: string;
 }
 
 interface Expense {
   id: string;
-  category: 'stay' | 'transport' | 'food' | 'emergency' | 'other';
+  category: 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'other';
   amount: number;
   description: string;
-  date: string;
+  paid_by: string;
+  trip_id: string;
+  user_id: string;
+  created_at: string;
 }
 
 interface ScheduleItem {
@@ -35,15 +40,16 @@ interface TripSummaryProps {
 }
 
 const categoryIcons = {
-  stay: Home,
+  accommodation: Home,
   transport: Car,
   food: UtensilsCrossed,
-  emergency: AlertTriangle,
+  entertainment: Activity,
+  shopping: Activity,
   other: Activity
 };
 
 export const TripSummary: React.FC<TripSummaryProps> = ({ attendees, expenses, schedule }) => {
-  const confirmedAttendees = attendees.filter(a => a.confirmed);
+  const confirmedAttendees = attendees; // All stored attendees are considered confirmed
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
   const upcomingActivities = schedule.filter(item => new Date(`${item.date}T${item.time}`) >= new Date());
   
@@ -163,8 +169,8 @@ export const TripSummary: React.FC<TripSummaryProps> = ({ attendees, expenses, s
                   {attendees.slice(0, 3).map((attendee) => (
                     <div key={attendee.id} className="flex items-center justify-between text-sm">
                       <span className="truncate">{attendee.name}</span>
-                      <Badge variant={attendee.confirmed ? "default" : "secondary"} className="ml-2">
-                        {attendee.confirmed ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                      <Badge variant="default" className="ml-2">
+                        <Check className="h-3 w-3" />
                       </Badge>
                     </div>
                   ))}
