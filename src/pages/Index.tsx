@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useTrip } from "@/hooks/useTrip";
 import { supabase } from "@/integrations/supabase/client";
+import safariLogo from "@/assets/safari-logo.png";
 interface Attendee {
   id: string;
   name: string;
@@ -273,7 +274,7 @@ const Index = () => {
       <div className="bg-gradient-safari text-white p-4 md:p-6 shadow-safari">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
           <div>
-            <h1 className="text-2xl md:text-4xl font-bold mb-1 md:mb-2">Safari</h1>
+            <img src={safariLogo} alt="Safari" className="h-8 md:h-12 mb-1 md:mb-2" />
             <p className="text-sm md:text-lg opacity-90">Your Ultimate Travel Companion</p>
             <p className="text-xs md:text-sm opacity-75">Welcome back, {user.email}</p>
           </div>
