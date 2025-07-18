@@ -73,31 +73,18 @@ const Index = () => {
       preloadData();
     }
   }, [currentTrip, user, tripLoading]);
-
   const preloadData = async () => {
     if (!currentTrip || !user) return;
-    
     setDataLoading(true);
     try {
       // Load all data in parallel for better performance
-      const [attendeesData, expensesData, scheduleData] = await Promise.all([
-        supabase
-          .from('attendees')
-          .select('*')
-          .eq('trip_id', currentTrip.id)
-          .order('created_at', { ascending: true }),
-        supabase
-          .from('expenses')
-          .select('*')
-          .eq('trip_id', currentTrip.id)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('schedule_items')
-          .select('*')
-          .eq('trip_id', currentTrip.id)
-          .order('date', { ascending: true })
-      ]);
-
+      const [attendeesData, expensesData, scheduleData] = await Promise.all([supabase.from('attendees').select('*').eq('trip_id', currentTrip.id).order('created_at', {
+        ascending: true
+      }), supabase.from('expenses').select('*').eq('trip_id', currentTrip.id).order('created_at', {
+        ascending: false
+      }), supabase.from('schedule_items').select('*').eq('trip_id', currentTrip.id).order('date', {
+        ascending: true
+      })]);
       if (attendeesData.data) setAttendees(attendeesData.data);
       if (expensesData.data) setExpenses(expensesData.data);
       if (scheduleData.data) {
@@ -117,7 +104,7 @@ const Index = () => {
       toast({
         title: "Error",
         description: "Failed to load trip data",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setDataLoading(false);
@@ -128,9 +115,7 @@ const Index = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
           <p className="mt-4 text-muted-foreground">
-            {authLoading ? "Authenticating..." : 
-             tripLoading ? "Loading trip..." : 
-             "Loading your data..."}
+            {authLoading ? "Authenticating..." : tripLoading ? "Loading trip..." : "Loading your data..."}
           </p>
         </div>
       </div>;
@@ -369,7 +354,7 @@ const Index = () => {
               <span className="sm:hidden">Att</span>
             </TabsTrigger>
             <TabsTrigger value="expenses" className="data-[state=active]:bg-safari-green data-[state=active]:text-white px-2 md:px-4">
-              <span className="hidden sm:inline">Expenses</span>
+              <span className="hidden sm:inline">Budget</span>
               <span className="sm:hidden">Exp</span>
             </TabsTrigger>
             <TabsTrigger value="schedule" className="data-[state=active]:bg-safari-green data-[state=active]:text-white px-2 md:px-4">
