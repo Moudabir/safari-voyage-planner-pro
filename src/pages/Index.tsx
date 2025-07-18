@@ -274,7 +274,7 @@ const Index = () => {
       <div className="bg-gradient-safari text-white p-4 md:p-6 shadow-safari">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
           <div>
-            <img src={safariLogo} alt="Safari" className="h-17 md:h-21 mb-1 md:mb-2" />
+            <img src={safariLogo} alt="Safari" className="h-14 md:h-18 mb-1 md:mb-2" />
             <p className="text-sm md:text-lg opacity-90">Your Ultimate Travel Companion</p>
             <p className="text-xs md:text-sm opacity-75">Welcome back, {user.email}</p>
           </div>
