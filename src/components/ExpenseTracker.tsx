@@ -185,10 +185,10 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-safari-orange">Expense Tracker</h2>
-          <p className="text-muted-foreground">
+      <div className="flex flex-col md:flex-row justify-between md:items-center mb-4 md:mb-0">
+        <div className="mb-4 md:mb-0">
+          <h2 className="text-xl md:text-2xl font-bold text-safari-orange">Expense Tracker</h2>
+          <p className="text-sm md:text-base text-muted-foreground">
             Track all your trip expenses by category
           </p>
         </div>
@@ -263,7 +263,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
       </div>
 
       {/* Category Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
         {Object.entries(categoryIcons).map(([category, Icon]) => (
           <Card key={category} className="border-safari-sand bg-gradient-to-br from-card to-safari-cream">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

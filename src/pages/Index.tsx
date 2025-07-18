@@ -13,6 +13,7 @@ import { TripSummary } from "@/components/TripSummary";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useTrip } from "@/hooks/useTrip";
+import { supabase } from "@/integrations/supabase/client";
 interface Attendee {
   id: string;
   name: string;
@@ -45,6 +46,7 @@ const Index = () => {
   const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
   const {
     toast
   } = useToast();
@@ -63,11 +65,72 @@ const Index = () => {
       navigate("/auth");
     }
   }, [user, authLoading, navigate]);
-  if (authLoading || tripLoading) {
+
+  // Preload all data when trip is available
+  useEffect(() => {
+    if (currentTrip && user && !tripLoading) {
+      preloadData();
+    }
+  }, [currentTrip, user, tripLoading]);
+
+  const preloadData = async () => {
+    if (!currentTrip || !user) return;
+    
+    setDataLoading(true);
+    try {
+      // Load all data in parallel for better performance
+      const [attendeesData, expensesData, scheduleData] = await Promise.all([
+        supabase
+          .from('attendees')
+          .select('*')
+          .eq('trip_id', currentTrip.id)
+          .order('created_at', { ascending: true }),
+        supabase
+          .from('expenses')
+          .select('*')
+          .eq('trip_id', currentTrip.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('schedule_items')
+          .select('*')
+          .eq('trip_id', currentTrip.id)
+          .order('date', { ascending: true })
+      ]);
+
+      if (attendeesData.data) setAttendees(attendeesData.data);
+      if (expensesData.data) setExpenses(expensesData.data);
+      if (scheduleData.data) {
+        const formattedSchedule = scheduleData.data.map(item => ({
+          id: item.id,
+          title: item.title,
+          time: item.time || '',
+          date: item.date,
+          type: 'activity' as 'gathering' | 'activity',
+          location: item.description || '',
+          pictures: item.pictures || []
+        }));
+        setSchedule(formattedSchedule);
+      }
+    } catch (error) {
+      console.error('Error preloading data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load trip data",
+        variant: "destructive",
+      });
+    } finally {
+      setDataLoading(false);
+    }
+  };
+  if (authLoading || tripLoading || dataLoading) {
     return <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-          <p className="mt-4 text-muted-foreground">Loading your trip data...</p>
+          <p className="mt-4 text-muted-foreground">
+            {authLoading ? "Authenticating..." : 
+             tripLoading ? "Loading trip..." : 
+             "Loading your data..."}
+          </p>
         </div>
       </div>;
   }
@@ -207,37 +270,37 @@ const Index = () => {
   };
   return <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-safari text-white p-6 shadow-safari">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
+      <div className="bg-gradient-safari text-white p-4 md:p-6 shadow-safari">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Safari</h1>
-            <p className="text-lg opacity-90">Your Ultimate Travel Companion</p>
-            <p className="text-sm opacity-75">Welcome back, {user.email}</p>
+            <h1 className="text-2xl md:text-4xl font-bold mb-1 md:mb-2">Safari</h1>
+            <p className="text-sm md:text-lg opacity-90">Your Ultimate Travel Companion</p>
+            <p className="text-xs md:text-sm opacity-75">Welcome back, {user.email}</p>
           </div>
-          <div className="flex space-x-3">
+          <div className="flex flex-wrap gap-2 md:space-x-3 w-full md:w-auto">
             <input type="file" accept=".csv" onChange={importFromCSV} style={{
             display: 'none'
           }} id="csv-import" />
-            <Button onClick={() => document.getElementById('csv-import')?.click()} className="bg-white text-safari-green hover:bg-white/90 font-semibold">
-              <Upload className="h-4 w-4 mr-2" />
-              Import CSV
+            <Button onClick={() => document.getElementById('csv-import')?.click()} className="bg-white text-safari-green hover:bg-white/90 font-semibold text-sm px-3 py-2 md:px-4 md:py-2">
+              <Upload className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">Import</span>
             </Button>
-            <Button onClick={exportToCSV} className="bg-white text-safari-green hover:bg-white/90 font-semibold">
-              <Download className="h-4 w-4 mr-2" />
-              Export CSV
+            <Button onClick={exportToCSV} className="bg-white text-safari-green hover:bg-white/90 font-semibold text-sm px-3 py-2 md:px-4 md:py-2">
+              <Download className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">Export</span>
             </Button>
             
-            <Button onClick={signOut} className="bg-white text-safari-green hover:bg-white/90 font-semibold">
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
+            <Button onClick={signOut} className="bg-white text-safari-green hover:bg-white/90 font-semibold text-sm px-3 py-2 md:px-4 md:py-2">
+              <LogOut className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">Sign Out</span>
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
           <Card className="border-safari-sand bg-gradient-to-br from-card to-safari-cream">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Confirmed</CardTitle>
@@ -295,21 +358,26 @@ const Index = () => {
 
         {/* Main Content */}
         <Tabs defaultValue="summary" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-safari-sand">
-            <TabsTrigger value="summary" className="data-[state=active]:bg-safari-green data-[state=active]:text-white">
-              Summary
+          <TabsList className="grid w-full grid-cols-5 bg-safari-sand text-xs md:text-sm">
+            <TabsTrigger value="summary" className="data-[state=active]:bg-safari-green data-[state=active]:text-white px-2 md:px-4">
+              <span className="hidden sm:inline">Summary</span>
+              <span className="sm:hidden">Sum</span>
             </TabsTrigger>
-            <TabsTrigger value="attendees" className="data-[state=active]:bg-safari-green data-[state=active]:text-white">
-              Attendees
+            <TabsTrigger value="attendees" className="data-[state=active]:bg-safari-green data-[state=active]:text-white px-2 md:px-4">
+              <span className="hidden sm:inline">Attendees</span>
+              <span className="sm:hidden">Att</span>
             </TabsTrigger>
-            <TabsTrigger value="expenses" className="data-[state=active]:bg-safari-green data-[state=active]:text-white">
-              Expenses
+            <TabsTrigger value="expenses" className="data-[state=active]:bg-safari-green data-[state=active]:text-white px-2 md:px-4">
+              <span className="hidden sm:inline">Expenses</span>
+              <span className="sm:hidden">Exp</span>
             </TabsTrigger>
-            <TabsTrigger value="schedule" className="data-[state=active]:bg-safari-green data-[state=active]:text-white">
-              Schedule
+            <TabsTrigger value="schedule" className="data-[state=active]:bg-safari-green data-[state=active]:text-white px-2 md:px-4">
+              <span className="hidden sm:inline">Schedule</span>
+              <span className="sm:hidden">Sch</span>
             </TabsTrigger>
-            <TabsTrigger value="overview" className="data-[state=active]:bg-safari-green data-[state=active]:text-white">
-              Overview
+            <TabsTrigger value="overview" className="data-[state=active]:bg-safari-green data-[state=active]:text-white px-2 md:px-4">
+              <span className="hidden sm:inline">Overview</span>
+              <span className="sm:hidden">Ovr</span>
             </TabsTrigger>
           </TabsList>
 
