@@ -10,7 +10,6 @@ import { Trash2, UserPlus, MapPin, MessageCircle, Check, X } from "lucide-react"
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-
 interface Attendee {
   id: string;
   name: string;
@@ -20,13 +19,11 @@ interface Attendee {
   user_id: string;
   created_at: string;
 }
-
 interface AttendeeTrackerProps {
   attendees: Attendee[];
   setAttendees: (attendees: Attendee[]) => void;
   tripId: string;
 }
-
 export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
   attendees,
   setAttendees,
@@ -41,59 +38,53 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
     confirmed: false,
     pickupLocation: ""
   });
-  const { toast } = useToast();
-  const { user } = useAuth();
-
+  const {
+    toast
+  } = useToast();
+  const {
+    user
+  } = useAuth();
   useEffect(() => {
     if (tripId && user) {
       loadAttendees();
     }
   }, [tripId, user]);
-
   const loadAttendees = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('attendees')
-        .select('*')
-        .eq('trip_id', tripId)
-        .order('created_at', { ascending: true });
-
+      const {
+        data,
+        error
+      } = await supabase.from('attendees').select('*').eq('trip_id', tripId).order('created_at', {
+        ascending: true
+      });
       if (error) throw error;
-
       setAttendees(data);
     } catch (error: any) {
       toast({
         title: "Error",
         description: "Failed to load attendees",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
   const handleAddAttendee = async () => {
     if (!newAttendee.name || !user) return;
-
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('attendees')
-        .insert([
-          {
-            trip_id: tripId,
-            user_id: user.id,
-            name: newAttendee.name,
-            email: newAttendee.email,
-            phone: newAttendee.phone
-          }
-        ])
-        .select()
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('attendees').insert([{
+        trip_id: tripId,
+        user_id: user.id,
+        name: newAttendee.name,
+        email: newAttendee.email,
+        phone: newAttendee.phone
+      }]).select().single();
       if (error) throw error;
-
       setAttendees([...attendees, data]);
       setNewAttendee({
         name: "",
@@ -111,24 +102,19 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
       toast({
         title: "Error",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
   const handleDeleteAttendee = async (id: string) => {
     const attendee = attendees.find(a => a.id === id);
-    
     try {
-      const { error } = await supabase
-        .from('attendees')
-        .delete()
-        .eq('id', id);
-
+      const {
+        error
+      } = await supabase.from('attendees').delete().eq('id', id);
       if (error) throw error;
-
       setAttendees(attendees.filter(a => a.id !== id));
       toast({
         title: "Attendee Removed",
@@ -138,21 +124,16 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
       toast({
         title: "Error",
         description: "Failed to remove attendee",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   if (loading && attendees.length === 0) {
-    return (
-      <div className="flex items-center justify-center py-12">
+    return <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between md:items-center mb-4 md:mb-0">
         <div className="mb-4 md:mb-0">
@@ -175,47 +156,23 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
             <div className="space-y-4">
               <div>
                 <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  placeholder="Enter attendee name"
-                  value={newAttendee.name}
-                  onChange={(e) => setNewAttendee({
-                    ...newAttendee,
-                    name: e.target.value
-                  })}
-                />
+                <Input id="name" placeholder="Enter attendee name" value={newAttendee.name} onChange={e => setNewAttendee({
+                ...newAttendee,
+                name: e.target.value
+              })} />
               </div>
               <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter email address"
-                  value={newAttendee.email}
-                  onChange={(e) => setNewAttendee({
-                    ...newAttendee,
-                    email: e.target.value
-                  })}
-                />
+                
+                
               </div>
               <div>
                 <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="Enter phone number"
-                  value={newAttendee.phone}
-                  onChange={(e) => setNewAttendee({
-                    ...newAttendee,
-                    phone: e.target.value
-                  })}
-                />
+                <Input id="phone" type="tel" placeholder="Enter phone number" value={newAttendee.phone} onChange={e => setNewAttendee({
+                ...newAttendee,
+                phone: e.target.value
+              })} />
               </div>
-              <Button 
-                onClick={handleAddAttendee} 
-                className="w-full bg-safari-green hover:bg-safari-green/90"
-                disabled={loading}
-              >
+              <Button onClick={handleAddAttendee} className="w-full bg-safari-green hover:bg-safari-green/90" disabled={loading}>
                 {loading ? "Adding..." : "Add Attendee"}
               </Button>
             </div>
@@ -224,8 +181,7 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
       </div>
 
       {/* Attendees List */}
-      {attendees.length === 0 ? (
-        <Card className="border-safari-sand">
+      {attendees.length === 0 ? <Card className="border-safari-sand">
           <CardContent className="py-12">
             <div className="text-center">
               <UserPlus className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -238,11 +194,8 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
               </Button>
             </div>
           </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {attendees.map((attendee) => (
-            <Card key={attendee.id} className="border-safari-sand bg-gradient-to-br from-card to-safari-cream">
+        </Card> : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {attendees.map(attendee => <Card key={attendee.id} className="border-safari-sand bg-gradient-to-br from-card to-safari-cream">
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                   <div>
@@ -252,47 +205,30 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
                        Confirmed
                      </Badge>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteAttendee(attendee.id)}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => handleDeleteAttendee(attendee.id)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {attendee.email && (
-                    <div className="flex items-center space-x-2 text-sm">
+                  {attendee.email && <div className="flex items-center space-x-2 text-sm">
                       <span className="text-muted-foreground">Email:</span>
                       <span className="truncate">{attendee.email}</span>
-                    </div>
-                  )}
-                  {attendee.phone && (
-                     <div className="flex items-center space-x-2 text-sm">
+                    </div>}
+                  {attendee.phone && <div className="flex items-center space-x-2 text-sm">
                        <MessageCircle className="h-4 w-4 text-muted-foreground" />
-                       <a 
-                         href={`https://wa.me/${attendee.phone?.replace(/[^0-9]/g, '') || ''}`}
-                         target="_blank"
-                         rel="noopener noreferrer"
-                         className="truncate text-safari-green hover:underline cursor-pointer"
-                       >
+                       <a href={`https://wa.me/${attendee.phone?.replace(/[^0-9]/g, '') || ''}`} target="_blank" rel="noopener noreferrer" className="truncate text-safari-green hover:underline cursor-pointer">
                          {attendee.phone}
                        </a>
-                     </div>
-                  )}
+                     </div>}
                 </div>
               </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+            </Card>)}
+        </div>}
 
       {/* Summary Stats */}
-      {attendees.length > 0 && (
-        <Card className="border-safari-sand bg-gradient-to-r from-safari-green/10 to-safari-orange/10">
+      {attendees.length > 0 && <Card className="border-safari-sand bg-gradient-to-r from-safari-green/10 to-safari-orange/10">
           <CardHeader>
             <CardTitle className="text-safari-brown">Attendee Summary</CardTitle>
           </CardHeader>
@@ -318,8 +254,6 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
               </div>
             </div>
           </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+        </Card>}
+    </div>;
 };
