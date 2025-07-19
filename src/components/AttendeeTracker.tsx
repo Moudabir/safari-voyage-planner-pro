@@ -115,7 +115,6 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
       setLoading(false);
     }
   };
-
   const handleEditAttendee = (attendee: Attendee) => {
     setEditingAttendee(attendee);
     setEditForm({
@@ -125,25 +124,19 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
     });
     setIsEditingAttendee(true);
   };
-
   const handleUpdateAttendee = async () => {
     if (!editingAttendee || !editForm.name || !user) return;
-
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('attendees')
-        .update({
-          name: editForm.name,
-          email: editForm.email || null,
-          phone: editForm.phone || null
-        })
-        .eq('id', editingAttendee.id)
-        .select()
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('attendees').update({
+        name: editForm.name,
+        email: editForm.email || null,
+        phone: editForm.phone || null
+      }).eq('id', editingAttendee.id).select().single();
       if (error) throw error;
-
       setAttendees(attendees.map(a => a.id === editingAttendee.id ? data : a));
       setIsEditingAttendee(false);
       setEditingAttendee(null);
@@ -217,9 +210,9 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
               <div>
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" placeholder="Enter email address" value={newAttendee.email} onChange={e => setNewAttendee({
-                  ...newAttendee,
-                  email: e.target.value
-                })} />
+                ...newAttendee,
+                email: e.target.value
+              })} />
               </div>
               <div>
                 <Label htmlFor="phone">Phone Number</Label>
@@ -326,38 +319,20 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
           <div className="space-y-4">
             <div>
               <Label htmlFor="edit-name">Name</Label>
-              <Input
-                id="edit-name"
-                placeholder="Enter attendee name"
-                value={editForm.name}
-                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-              />
+              <Input id="edit-name" placeholder="Enter attendee name" value={editForm.name} onChange={e => setEditForm({
+              ...editForm,
+              name: e.target.value
+            })} />
             </div>
-            <div>
-              <Label htmlFor="edit-email">Email</Label>
-              <Input
-                id="edit-email"
-                type="email"
-                placeholder="Enter email address"
-                value={editForm.email}
-                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-              />
-            </div>
+            
             <div>
               <Label htmlFor="edit-phone">Phone Number</Label>
-              <Input
-                id="edit-phone"
-                type="tel"
-                placeholder="Enter phone number"
-                value={editForm.phone}
-                onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-              />
+              <Input id="edit-phone" type="tel" placeholder="Enter phone number" value={editForm.phone} onChange={e => setEditForm({
+              ...editForm,
+              phone: e.target.value
+            })} />
             </div>
-            <Button
-              onClick={handleUpdateAttendee}
-              className="w-full bg-safari-green hover:bg-safari-green/90"
-              disabled={loading}
-            >
+            <Button onClick={handleUpdateAttendee} className="w-full bg-safari-green hover:bg-safari-green/90" disabled={loading}>
               {loading ? "Updating..." : "Update Attendee"}
             </Button>
           </div>
