@@ -17,10 +17,14 @@ export const useDataLoader = (currentTrip: any, user: any, tripLoading: boolean)
   });
   const [dataLoading, setDataLoading] = useState(true);
   const hasLoadedRef = useRef(false);
+  const currentTripIdRef = useRef<string | null>(null);
   const { toast } = useToast();
 
   const loadData = async () => {
-    if (!currentTrip || !user || hasLoadedRef.current) return;
+    if (!currentTrip || !user) return;
+    
+    // Only reload if trip changed or hasn't been loaded yet
+    if (hasLoadedRef.current && currentTripIdRef.current === currentTrip.id) return;
 
     console.log('Loading trip data...');
     setDataLoading(true);
@@ -48,6 +52,7 @@ export const useDataLoader = (currentTrip: any, user: any, tripLoading: boolean)
 
       setData(newData);
       hasLoadedRef.current = true;
+      currentTripIdRef.current = currentTrip.id;
       console.log('Data loaded successfully');
     } catch (error) {
       console.error('Error loading data:', error);
@@ -62,10 +67,10 @@ export const useDataLoader = (currentTrip: any, user: any, tripLoading: boolean)
   };
 
   useEffect(() => {
-    if (currentTrip && user && !tripLoading && !hasLoadedRef.current) {
+    if (currentTrip && user && !tripLoading) {
       loadData();
     }
-  }, [currentTrip, user, tripLoading]);
+  }, [currentTrip?.id, user?.id, tripLoading]);
 
   const updateAttendees = (newAttendees: any[]) => {
     setData(prev => ({ ...prev, attendees: newAttendees }));
