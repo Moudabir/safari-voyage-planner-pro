@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, Calendar, Clock, MapPin, Users, Activity, Camera, Image } from "lucide-react";
+import { Trash2, Plus, Calendar, Clock, MapPin, Users, Activity, Camera, Image, Edit2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -34,6 +34,8 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
   tripId 
 }) => {
   const [isAddingItem, setIsAddingItem] = useState(false);
+  const [isEditingItem, setIsEditingItem] = useState(false);
+  const [editingItem, setEditingItem] = useState<ScheduleItem | null>(null);
   const [selectedItem, setSelectedItem] = useState<ScheduleItem | null>(null);
   const [isManagingPictures, setIsManagingPictures] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -47,6 +49,19 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
     title: '',
     time: '',
     date: new Date().toISOString().split('T')[0],
+    type: 'activity',
+    location: ''
+  });
+  const [editForm, setEditForm] = useState<{
+    title: string;
+    time: string;
+    date: string;
+    type: 'gathering' | 'activity';
+    location: string;
+  }>({
+    title: '',
+    time: '',
+    date: '',
     type: 'activity',
     location: ''
   });
@@ -171,6 +186,65 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
         description: "Failed to remove schedule item",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleEditItem = (item: ScheduleItem) => {
+    setEditingItem(item);
+    setEditForm({
+      title: item.title,
+      time: item.time,
+      date: item.date,
+      type: item.type,
+      location: item.location
+    });
+    setIsEditingItem(true);
+  };
+
+  const handleUpdateItem = async () => {
+    if (!editingItem || !editForm.title || !editForm.time || !editForm.date || !user) return;
+
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('schedule_items')
+        .update({
+          title: editForm.title,
+          date: editForm.date,
+          time: editForm.time,
+          description: editForm.location
+        })
+        .eq('id', editingItem.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const updatedItem = {
+        id: data.id,
+        title: data.title,
+        time: data.time || '',
+        date: data.date,
+        type: editForm.type,
+        location: data.description || '',
+        pictures: data.pictures || []
+      };
+
+      setSchedule(schedule.map(s => s.id === editingItem.id ? updatedItem : s));
+      setIsEditingItem(false);
+      setEditingItem(null);
+      toast({
+        title: "Schedule Item Updated",
+        description: `${data.title} has been updated successfully.`
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -475,27 +549,35 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
                              )}
                            </div>
                          </div>
-                         <div className="flex items-center space-x-2 self-end md:self-center">
-                           <Button
-                             variant="ghost"
-                             size="sm"
-                             onClick={() => {
-                               setSelectedItem(item);
-                               setIsManagingPictures(true);
-                             }}
-                             className="text-safari-green hover:text-safari-green hover:bg-safari-green/10"
-                           >
-                             <Camera className="h-4 w-4" />
-                           </Button>
-                           <Button
-                             variant="ghost"
-                             size="sm"
-                             onClick={() => handleDeleteItem(item.id)}
-                             className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                           >
-                             <Trash2 className="h-4 w-4" />
-                           </Button>
-                         </div>
+                          <div className="flex items-center space-x-2 self-end md:self-center">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditItem(item)}
+                              className="text-safari-brown hover:text-safari-brown hover:bg-safari-brown/10"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedItem(item);
+                                setIsManagingPictures(true);
+                              }}
+                              className="text-safari-green hover:text-safari-green hover:bg-safari-green/10"
+                            >
+                              <Camera className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteItem(item.id)}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                        </div>
                       {item.pictures && item.pictures.length > 0 && (
                         <div className="mt-3 pt-3 border-t">
@@ -592,6 +674,76 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
                 </div>
               </div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Schedule Item Dialog */}
+      <Dialog open={isEditingItem} onOpenChange={setIsEditingItem}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Schedule Item</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-title">Title</Label>
+              <Input
+                id="edit-title"
+                placeholder="Enter activity or gathering title"
+                value={editForm.title}
+                onChange={(e) => setEditForm({...editForm, title: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-type">Type</Label>
+              <Select value={editForm.type} onValueChange={(value: 'gathering' | 'activity') => 
+                setEditForm({...editForm, type: value})
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gathering">Gathering</SelectItem>
+                  <SelectItem value="activity">Activity</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-date">Date</Label>
+                <Input
+                  id="edit-date"
+                  type="date"
+                  value={editForm.date}
+                  onChange={(e) => setEditForm({...editForm, date: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-time">Time</Label>
+                <Input
+                  id="edit-time"
+                  type="time"
+                  value={editForm.time}
+                  onChange={(e) => setEditForm({...editForm, time: e.target.value})}
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="edit-location">Location</Label>
+              <Input
+                id="edit-location"
+                placeholder="Enter location"
+                value={editForm.location}
+                onChange={(e) => setEditForm({...editForm, location: e.target.value})}
+              />
+            </div>
+            <Button 
+              onClick={handleUpdateItem} 
+              className="w-full bg-safari-brown hover:bg-safari-brown/90"
+              disabled={loading}
+            >
+              {loading ? "Updating..." : "Update Schedule Item"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

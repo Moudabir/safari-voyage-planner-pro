@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Trash2, UserPlus, MapPin, MessageCircle, Check, X } from "lucide-react";
+import { Trash2, UserPlus, MapPin, MessageCircle, Check, X, Edit2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,6 +30,8 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
   tripId
 }) => {
   const [isAddingAttendee, setIsAddingAttendee] = useState(false);
+  const [isEditingAttendee, setIsEditingAttendee] = useState(false);
+  const [editingAttendee, setEditingAttendee] = useState<Attendee | null>(null);
   const [loading, setLoading] = useState(false);
   const [newAttendee, setNewAttendee] = useState({
     name: "",
@@ -37,6 +39,11 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
     phone: "",
     confirmed: false,
     pickupLocation: ""
+  });
+  const [editForm, setEditForm] = useState({
+    name: "",
+    email: "",
+    phone: ""
   });
   const {
     toast
@@ -108,6 +115,52 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
       setLoading(false);
     }
   };
+
+  const handleEditAttendee = (attendee: Attendee) => {
+    setEditingAttendee(attendee);
+    setEditForm({
+      name: attendee.name,
+      email: attendee.email || "",
+      phone: attendee.phone || ""
+    });
+    setIsEditingAttendee(true);
+  };
+
+  const handleUpdateAttendee = async () => {
+    if (!editingAttendee || !editForm.name || !user) return;
+
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('attendees')
+        .update({
+          name: editForm.name,
+          email: editForm.email || null,
+          phone: editForm.phone || null
+        })
+        .eq('id', editingAttendee.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setAttendees(attendees.map(a => a.id === editingAttendee.id ? data : a));
+      setIsEditingAttendee(false);
+      setEditingAttendee(null);
+      toast({
+        title: "Attendee Updated",
+        description: `${data.name} has been updated successfully.`
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleDeleteAttendee = async (id: string) => {
     const attendee = attendees.find(a => a.id === id);
     try {
@@ -162,8 +215,11 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
               })} />
               </div>
               <div>
-                
-                
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" placeholder="Enter email address" value={newAttendee.email} onChange={e => setNewAttendee({
+                  ...newAttendee,
+                  email: e.target.value
+                })} />
               </div>
               <div>
                 <Label htmlFor="phone">Phone Number</Label>
@@ -204,10 +260,15 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
                        <Check className="h-3 w-3 mr-1" />
                        Confirmed
                      </Badge>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => handleDeleteAttendee(attendee.id)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                   </div>
+                   <div className="flex space-x-1">
+                     <Button variant="ghost" size="sm" onClick={() => handleEditAttendee(attendee)} className="text-safari-green hover:text-safari-green hover:bg-safari-green/10">
+                       <Edit2 className="h-4 w-4" />
+                     </Button>
+                     <Button variant="ghost" size="sm" onClick={() => handleDeleteAttendee(attendee.id)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                       <Trash2 className="h-4 w-4" />
+                     </Button>
+                   </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -255,5 +316,52 @@ export const AttendeeTracker: React.FC<AttendeeTrackerProps> = ({
             </div>
           </CardContent>
         </Card>}
+
+      {/* Edit Attendee Dialog */}
+      <Dialog open={isEditingAttendee} onOpenChange={setIsEditingAttendee}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Attendee</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-name">Name</Label>
+              <Input
+                id="edit-name"
+                placeholder="Enter attendee name"
+                value={editForm.name}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-email">Email</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                placeholder="Enter email address"
+                value={editForm.email}
+                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-phone">Phone Number</Label>
+              <Input
+                id="edit-phone"
+                type="tel"
+                placeholder="Enter phone number"
+                value={editForm.phone}
+                onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+              />
+            </div>
+            <Button
+              onClick={handleUpdateAttendee}
+              className="w-full bg-safari-green hover:bg-safari-green/90"
+              disabled={loading}
+            >
+              {loading ? "Updating..." : "Update Attendee"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>;
 };

@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Trash2, Plus, Banknote, Home, Car, UtensilsCrossed, AlertTriangle, Activity } from "lucide-react";
+import { Trash2, Plus, Banknote, Home, Car, UtensilsCrossed, AlertTriangle, Activity, Edit2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -52,8 +52,21 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
   tripId 
 }) => {
   const [isAddingExpense, setIsAddingExpense] = useState(false);
+  const [isEditingExpense, setIsEditingExpense] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [loading, setLoading] = useState(false);
   const [newExpense, setNewExpense] = useState<{
+    category: 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'other';
+    amount: string;
+    description: string;
+    paid_by: string;
+  }>({
+    category: 'food',
+    amount: '',
+    description: '',
+    paid_by: ''
+  });
+  const [editForm, setEditForm] = useState<{
     category: 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'other';
     amount: string;
     description: string;
@@ -163,6 +176,54 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
         description: "Failed to remove expense",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleEditExpense = (expense: Expense) => {
+    setEditingExpense(expense);
+    setEditForm({
+      category: expense.category,
+      amount: expense.amount.toString(),
+      description: expense.description,
+      paid_by: expense.paid_by
+    });
+    setIsEditingExpense(true);
+  };
+
+  const handleUpdateExpense = async () => {
+    if (!editingExpense || !editForm.amount || !editForm.description || !editForm.paid_by || !user) return;
+
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('expenses')
+        .update({
+          category: editForm.category,
+          amount: parseFloat(editForm.amount),
+          description: editForm.description,
+          paid_by: editForm.paid_by
+        })
+        .eq('id', editingExpense.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setExpenses(expenses.map(e => e.id === editingExpense.id ? data : e));
+      setIsEditingExpense(false);
+      setEditingExpense(null);
+      toast({
+        title: "Expense Updated",
+        description: `${data.description} has been updated successfully.`
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -323,19 +384,27 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
                          </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className={`text-lg font-bold ${categoryColors[expense.category]}`}>
-                        {expense.amount} DH
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteExpense(expense.id)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                     <div className="flex items-center space-x-2">
+                       <span className={`text-lg font-bold ${categoryColors[expense.category]}`}>
+                         {expense.amount} DH
+                       </span>
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => handleEditExpense(expense)}
+                         className="text-safari-orange hover:text-safari-orange hover:bg-safari-orange/10"
+                       >
+                         <Edit2 className="h-4 w-4" />
+                       </Button>
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => handleDeleteExpense(expense.id)}
+                         className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                       >
+                         <Trash2 className="h-4 w-4" />
+                       </Button>
+                     </div>
                   </div>
                 );
               })}
@@ -376,6 +445,70 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
           </CardContent>
         </Card>
       )}
+
+      {/* Edit Expense Dialog */}
+      <Dialog open={isEditingExpense} onOpenChange={setIsEditingExpense}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Expense</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-category">Category</Label>
+              <Select value={editForm.category} onValueChange={(value: 'food' | 'transport' | 'accommodation' | 'entertainment' | 'shopping' | 'other') => 
+                setEditForm({...editForm, category: value})
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="food">Food</SelectItem>
+                  <SelectItem value="transport">Transport</SelectItem>
+                  <SelectItem value="accommodation">Accommodation</SelectItem>
+                  <SelectItem value="entertainment">Entertainment</SelectItem>
+                  <SelectItem value="shopping">Shopping</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="edit-amount">Amount (DH)</Label>
+              <Input
+                id="edit-amount"
+                type="number"
+                placeholder="0.00"
+                value={editForm.amount}
+                onChange={(e) => setEditForm({...editForm, amount: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                placeholder="What was this expense for?"
+                value={editForm.description}
+                onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-paid_by">Paid By</Label>
+              <Input
+                id="edit-paid_by"
+                placeholder="Who paid for this?"
+                value={editForm.paid_by}
+                onChange={(e) => setEditForm({...editForm, paid_by: e.target.value})}
+              />
+            </div>
+            <Button 
+              onClick={handleUpdateExpense} 
+              className="w-full bg-safari-orange hover:bg-safari-orange/90"
+              disabled={loading}
+            >
+              {loading ? "Updating..." : "Update Expense"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
