@@ -35,36 +35,44 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 35 20% 97%;
-    --foreground: 25 30% 15%;
+    /* Brutalist Design System */
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 0 0% 0%;
+
+    --accent: 1 84% 67%;
+    --accent-foreground: 0 0% 100%;
+
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
 
     --card: 0 0% 100%;
-    --card-foreground: 25 30% 15%;
+    --card-foreground: 0 0% 0%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 25 30% 15%;
+    --popover-foreground: 0 0% 0%;
 
-    --primary: 85 35% 35%;
-    --primary-foreground: 0 0% 98%;
-
-    --secondary: 35 25% 85%;
-    --secondary-foreground: 25 30% 20%;
-
-    --muted: 35 20% 92%;
-    --muted-foreground: 25 15% 45%;
-
-    --accent: 25 90% 55%;
-    --accent-foreground: 0 0% 98%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 0%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 35 15% 88%;
-    --input: 35 15% 88%;
-    --ring: 85 35% 35%;
+    --border: 0 0% 0%;
+    --input: 0 0% 100%;
+    --ring: 0 0% 0%;
 
-    --radius: 0.5rem;
+    --radius: 12px;
 
+    /* Brutalist shadows and effects */
+    --shadow-brutal: 8px 8px 0px hsl(var(--primary));
+    --shadow-brutal-hover: 4px 4px 0px hsl(var(--primary));
+    --shadow-brutal-focus: 4px 4px 0px hsl(var(--primary));
+    --transition-brutal: all 0.3s;
+
+    /* Safari colors for compatibility */
     --safari-orange: 25 90% 55%;
     --safari-green: 85 35% 35%;
     --safari-brown: 35 40% 25%;
@@ -135,9 +143,67 @@ All colors MUST be HSL.
 @layer base {
   * {
     @apply border-border;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Courier New', monospace;
   }
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .brutalist-card {
+    @apply border-2 border-primary bg-secondary p-10 relative;
+    box-shadow: var(--shadow-brutal);
+    border-radius: var(--radius);
+  }
+
+  .brutalist-card::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: -6px;
+    bottom: -6px;
+    border: 2px solid hsl(var(--primary));
+    z-index: -1;
+    border-radius: var(--radius);
+  }
+
+  .brutalist-input {
+    @apply w-full p-3 border-2 border-primary bg-secondary text-foreground font-bold;
+    font-size: 16px;
+    outline: none;
+    transition: var(--transition-brutal);
+  }
+
+  .brutalist-input:focus {
+    box-shadow: var(--shadow-brutal-focus);
+  }
+
+  .brutalist-button {
+    @apply w-full p-3 bg-accent text-accent-foreground border-2 border-primary font-bold cursor-pointer;
+    font-size: 16px;
+    transition: var(--transition-brutal);
+  }
+
+  .brutalist-button:hover:not(:disabled) {
+    box-shadow: var(--shadow-brutal-hover);
+    transform: translate(-2px, -2px);
+  }
+
+  .brutalist-button:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  .brutalist-label {
+    @apply block mb-2 font-bold text-foreground;
+  }
+
+  .brutalist-title {
+    @apply text-foreground mb-8 text-3xl font-bold text-center;
   }
 }

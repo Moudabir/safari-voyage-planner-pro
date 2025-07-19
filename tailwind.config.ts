@@ -75,7 +75,10 @@ export default {
 				'gradient-sunset': 'var(--gradient-sunset)'
 			},
 			boxShadow: {
-				'safari': 'var(--shadow-safari)'
+				'safari': 'var(--shadow-safari)',
+				'brutal': 'var(--shadow-brutal)',
+				'brutal-hover': 'var(--shadow-brutal-hover)',
+				'brutal-focus': 'var(--shadow-brutal-focus)'
 			},
 			transitionProperty: {
 				'smooth': 'var(--transition-smooth)'

@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -12,6 +7,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -88,83 +84,92 @@ const Auth = () => {
     }
   };
 
+  const handleSubmit = mode === "signin" ? handleSignIn : handleSignUp;
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Safari Trip Planner</CardTitle>
-          <CardDescription>Sign in to access your trips and data</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing In..." : "Sign In"}
-                </Button>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="Create a password (min 6 characters)"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating Account..." : "Create Account"}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+    <div className="min-h-screen bg-background flex items-center justify-center p-5">
+      <div className="brutalist-card w-full max-w-md">
+        <h1 className="brutalist-title">
+          {mode === "signin" ? "Sign In" : "Create Account"}
+        </h1>
+        
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label htmlFor="email" className="brutalist-label">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="brutalist-input"
+            />
+          </div>
+          
+          <div>
+            <label htmlFor="password" className="brutalist-label">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              placeholder={mode === "signup" ? "Create a password (min 6 characters)" : "Enter your password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={mode === "signup" ? 6 : undefined}
+              className="brutalist-input"
+            />
+          </div>
+          
+          <button
+            type="submit"
+            disabled={loading}
+            className="brutalist-button mt-4"
+          >
+            {loading ? (
+              mode === "signin" ? "Signing In..." : "Creating Account..."
+            ) : (
+              mode === "signin" ? "Sign In" : "Create Account"
+            )}
+          </button>
+        </form>
+
+        <div className="flex items-center my-6 text-foreground font-bold">
+          <div className="flex-1 border-b-2 border-primary mr-3"></div>
+          <span>OR</span>
+          <div className="flex-1 border-b-2 border-primary ml-3"></div>
+        </div>
+
+        <div className="text-center">
+          <p className="text-foreground mb-4">
+            {mode === "signin" ? "Don't have an account?" : "Already have an account?"}
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setMode(mode === "signin" ? "signup" : "signin");
+              setEmail("");
+              setPassword("");
+            }}
+            className="brutalist-button bg-secondary text-foreground border-2 border-primary hover:shadow-brutal-hover hover:-translate-x-0.5 hover:-translate-y-0.5"
+          >
+            {mode === "signin" ? "Create New Account" : "Sign In Instead"}
+          </button>
+        </div>
+
+        <div className="text-center mt-5">
+          <p className="text-foreground">
+            <strong>Safari Trip Planner</strong>
+          </p>
+          <p className="text-foreground text-sm mt-1">
+            Your Ultimate Travel Companion
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
