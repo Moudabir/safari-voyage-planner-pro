@@ -85,7 +85,7 @@ All colors MUST be HSL.
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     
     /* Glass Effect */
-    --glass-orange: rgba(255, 193, 7, 0.2);
+    --glass-orange: rgba(255, 140, 0, 0.3);
     --glass-border: rgba(255, 255, 255, 0.2);
     --glass-backdrop: blur(10px);
 
@@ -217,6 +217,6 @@ All colors MUST be HSL.
     backdrop-filter: var(--glass-backdrop);
     -webkit-backdrop-filter: var(--glass-backdrop);
     border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px rgba(255, 193, 7, 0.1);
+    box-shadow: 0 8px 32px rgba(255, 140, 0, 0.15);
   }
 }
