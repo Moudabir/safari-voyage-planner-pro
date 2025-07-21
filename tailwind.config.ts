@@ -72,8 +72,7 @@ export default {
 			},
 			backgroundImage: {
 				'gradient-safari': 'var(--gradient-safari)',
-				'gradient-sunset': 'var(--gradient-sunset)',
-				'glass-orange': 'var(--glass-orange)'
+				'gradient-sunset': 'var(--gradient-sunset)'
 			},
 			boxShadow: {
 				'safari': 'var(--shadow-safari)',

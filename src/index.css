@@ -83,11 +83,6 @@ All colors MUST be HSL.
     --gradient-sunset: linear-gradient(180deg, hsl(var(--safari-orange)), hsl(25 80% 60%));
     --shadow-safari: 0 10px 30px -10px hsl(var(--safari-brown) / 0.3);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    
-    /* Glass Effect */
-    --glass-orange: rgba(204, 85, 0, 0.4);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --glass-backdrop: blur(10px);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -210,13 +205,5 @@ All colors MUST be HSL.
 
   .brutalist-title {
     @apply text-foreground mb-8 text-3xl font-bold text-center;
-  }
-
-  .glass-effect {
-    background: var(--glass-orange);
-    backdrop-filter: var(--glass-backdrop);
-    -webkit-backdrop-filter: var(--glass-backdrop);
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px rgba(204, 85, 0, 0.2);
   }
 }
