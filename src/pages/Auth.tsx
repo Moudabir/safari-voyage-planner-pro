@@ -112,7 +112,7 @@ const Auth = () => {
 
         <div className="flex items-center my-6 text-foreground font-bold">
           <div className="flex-1 border-b-2 border-primary mr-3"></div>
-          <span>OR</span>
+          <span>Wla</span>
           <div className="flex-1 border-b-2 border-primary ml-3"></div>
         </div>
 
