@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, Calendar, Clock, MapPin, Users, Activity, Camera, Image, Edit2 } from "lucide-react";
+import { Trash2, Plus, Calendar, Clock, MapPin, Users, Activity, Camera, Image, Edit2, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -38,6 +38,9 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
   const [editingItem, setEditingItem] = useState<ScheduleItem | null>(null);
   const [selectedItem, setSelectedItem] = useState<ScheduleItem | null>(null);
   const [isManagingPictures, setIsManagingPictures] = useState(false);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [newItem, setNewItem] = useState<{
     title: string;
@@ -327,6 +330,20 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
     }
   };
 
+  const openGallery = (pictures: string[], startIndex: number = 0) => {
+    setGalleryImages(pictures);
+    setCurrentImageIndex(startIndex);
+    setIsGalleryOpen(true);
+  };
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+  };
+
   const sortedSchedule = [...schedule].sort((a, b) => {
     const dateA = new Date(`${a.date}T${a.time}`);
     const dateB = new Date(`${b.date}T${b.time}`);
@@ -598,22 +615,29 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
                             <Image className="h-4 w-4 text-safari-green" />
                             <span className="text-sm font-medium">Pictures ({item.pictures.length})</span>
                           </div>
-                          <div className="flex flex-wrap gap-2">
-                            {item.pictures.slice(0, 3).map((picture, index) => (
-                              <div key={index} className="w-16 h-16 rounded-lg overflow-hidden bg-safari-sand">
-                                <img 
-                                  src={picture} 
-                                  alt={`${item.title} picture ${index + 1}`}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            ))}
-                            {item.pictures.length > 3 && (
-                              <div className="w-16 h-16 rounded-lg bg-safari-sand flex items-center justify-center">
-                                <span className="text-xs text-safari-brown font-medium">+{item.pictures.length - 3}</span>
-                              </div>
-                            )}
-                          </div>
+                           <div className="flex flex-wrap gap-3">
+                             {item.pictures.slice(0, 4).map((picture, index) => (
+                               <div 
+                                 key={index} 
+                                 className="w-24 h-24 rounded-lg overflow-hidden bg-safari-sand cursor-pointer hover:opacity-80 transition-opacity"
+                                 onClick={() => openGallery(item.pictures, index)}
+                               >
+                                 <img 
+                                   src={picture} 
+                                   alt={`${item.title} picture ${index + 1}`}
+                                   className="w-full h-full object-cover"
+                                 />
+                               </div>
+                             ))}
+                             {item.pictures.length > 4 && (
+                               <div 
+                                 className="w-24 h-24 rounded-lg bg-safari-sand flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+                                 onClick={() => openGallery(item.pictures, 4)}
+                               >
+                                 <span className="text-sm text-safari-brown font-medium">+{item.pictures.length - 4}</span>
+                               </div>
+                             )}
+                           </div>
                         </div>
                       )}
                     </div>
@@ -754,6 +778,90 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
               {loading ? "Updating..." : "Update Schedule Item"}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Gallery Dialog */}
+      <Dialog open={isGalleryOpen} onOpenChange={setIsGalleryOpen}>
+        <DialogContent className="max-w-4xl h-[80vh] p-0">
+          <DialogHeader className="p-6 pb-2">
+            <DialogTitle className="flex items-center justify-between">
+              <span>Image Gallery</span>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-muted-foreground">
+                  {currentImageIndex + 1} of {galleryImages.length}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsGalleryOpen(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 flex items-center justify-center relative p-6 pt-0">
+            {galleryImages.length > 0 && (
+              <>
+                {/* Main Image */}
+                <div className="flex-1 flex items-center justify-center">
+                  <img
+                    src={galleryImages[currentImageIndex]}
+                    alt={`Image ${currentImageIndex + 1}`}
+                    className="max-w-full max-h-[60vh] object-contain rounded-lg"
+                  />
+                </div>
+
+                {/* Navigation Buttons */}
+                {galleryImages.length > 1 && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
+                      onClick={prevImage}
+                    >
+                      <ChevronLeft className="h-6 w-6" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
+                      onClick={nextImage}
+                    >
+                      <ChevronRight className="h-6 w-6" />
+                    </Button>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Thumbnail Strip */}
+          {galleryImages.length > 1 && (
+            <div className="p-6 pt-0">
+              <div className="flex justify-center space-x-2 overflow-x-auto">
+                {galleryImages.map((image, index) => (
+                  <div
+                    key={index}
+                    className={`w-16 h-16 rounded-lg overflow-hidden cursor-pointer transition-all ${
+                      index === currentImageIndex
+                        ? 'ring-2 ring-safari-green'
+                        : 'opacity-60 hover:opacity-80'
+                    }`}
+                    onClick={() => setCurrentImageIndex(index)}
+                  >
+                    <img
+                      src={image}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
