@@ -248,12 +248,25 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
     }
   };
 
-  const handleAddPicture = async (itemId: string, pictureUrl: string) => {
+  const handleAddPicture = async (itemId: string, file: File) => {
     try {
       const item = schedule.find(s => s.id === itemId);
-      if (!item) return;
+      if (!item || !user) return;
 
-      const updatedPictures = [...(item.pictures || []), pictureUrl];
+      // Upload file to Supabase storage
+      const fileName = `${user.id}/${itemId}-${Date.now()}-${file.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('schedule-pictures')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('schedule-pictures')
+        .getPublicUrl(uploadData.path);
+
+      const updatedPictures = [...(item.pictures || []), publicUrl];
       
       const { error } = await supabase
         .from('schedule_items')
@@ -270,12 +283,12 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
       setSchedule(updatedSchedule);
       toast({
         title: "Picture Added",
-        description: "Picture has been added to the schedule item."
+        description: "Picture has been uploaded and added to the schedule item."
       });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to add picture",
+        description: "Failed to upload picture",
         variant: "destructive",
       });
     }
@@ -620,32 +633,28 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="picture-url">Add Picture URL</Label>
+              <Label htmlFor="picture-file">Upload Picture</Label>
               <div className="flex space-x-2">
                 <Input
-                  id="picture-url"
-                  placeholder="Enter image URL"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && selectedItem) {
-                      const url = (e.target as HTMLInputElement).value;
-                      if (url) {
-                        handleAddPicture(selectedItem.id, url);
-                        (e.target as HTMLInputElement).value = '';
-                      }
+                  id="picture-file"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file && selectedItem) {
+                      handleAddPicture(selectedItem.id, file);
+                      e.target.value = '';
                     }
                   }}
                 />
                 <Button
                   onClick={() => {
-                    const input = document.getElementById('picture-url') as HTMLInputElement;
-                    if (input.value && selectedItem) {
-                      handleAddPicture(selectedItem.id, input.value);
-                      input.value = '';
-                    }
+                    const input = document.getElementById('picture-file') as HTMLInputElement;
+                    input.click();
                   }}
                   className="bg-safari-green hover:bg-safari-green/90"
                 >
-                  Add
+                  Upload
                 </Button>
               </div>
             </div>
