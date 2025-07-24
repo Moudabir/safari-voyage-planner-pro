@@ -124,7 +124,7 @@ const Auth = () => {
             <input id="password" type="password" placeholder={mode === "signup" ? "Create a password (min 6 characters)" : "Enter your password"} value={password} onChange={e => setPassword(e.target.value)} required minLength={mode === "signup" ? 6 : undefined} className="brutalist-input" />
           </div>
           
-          <button type="submit" disabled={loading} className="brutalist-button mt-4">
+          <button type="submit" disabled={loading} className="brutalist-button mt-4 bg-green-600 hover:bg-green-500">
             {loading ? mode === "signin" ? "Signing In..." : "Creating Account..." : mode === "signin" ? "Sign In" : "Create Account"}
           </button>
         </form>
