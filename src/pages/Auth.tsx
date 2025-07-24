@@ -106,7 +106,7 @@ const Auth = () => {
   return <div className="min-h-screen bg-background flex items-center justify-center p-5">
       <div className="brutalist-card w-full max-w-md">
         <h1 className="brutalist-title text-slate-700">
-          {mode === "signin" ? "Sign In" : "Create Account"}
+          {mode === "signin" ? "Dkhol" : "Create Account"}
         </h1>
         
         <form onSubmit={handleSubmit} className="space-y-5">
