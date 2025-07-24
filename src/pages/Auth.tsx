@@ -105,22 +105,18 @@ const Auth = () => {
   const handleSubmit = mode === "signin" ? handleSignIn : handleSignUp;
   return <div className="min-h-screen bg-background flex items-center justify-center p-5">
       <div className="brutalist-card w-full max-w-md">
-        <h1 className="brutalist-title text-orange-500">
+        <h1 className="brutalist-title text-slate-700">
           {mode === "signin" ? "Sign In" : "Create Account"}
         </h1>
         
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="email" className="brutalist-label">
-              Email
-            </label>
+            <label htmlFor="email" className="brutalist-label">Dak lEmail</label>
             <input id="email" type="email" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} required className="brutalist-input" />
           </div>
           
           <div>
-            <label htmlFor="password" className="brutalist-label">
-              Password
-            </label>
+            <label htmlFor="password" className="brutalist-label">Secret Password</label>
             <input id="password" type="password" placeholder={mode === "signup" ? "Create a password (min 6 characters)" : "Enter your password"} value={password} onChange={e => setPassword(e.target.value)} required minLength={mode === "signup" ? 6 : undefined} className="brutalist-input" />
           </div>
           
