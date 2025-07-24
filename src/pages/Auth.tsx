@@ -105,7 +105,7 @@ const Auth = () => {
   const handleSubmit = mode === "signin" ? handleSignIn : handleSignUp;
   return <div className="min-h-screen bg-background flex items-center justify-center p-5">
       <div className="brutalist-card w-full max-w-md">
-        <h1 className="brutalist-title">
+        <h1 className="brutalist-title text-orange-500">
           {mode === "signin" ? "Sign In" : "Create Account"}
         </h1>
         
