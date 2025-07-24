@@ -121,7 +121,7 @@ const Auth = () => {
           </div>
           
           <button type="submit" disabled={loading} className="brutalist-button mt-4 bg-lime-800 hover:bg-lime-700">
-            {loading ? mode === "signin" ? "Signing In..." : "Creating Account..." : mode === "signin" ? "Sign In" : "Create Account"}
+            {loading ? mode === "signin" ? "Signing In..." : "Creating Account..." : mode === "signin" ? "Dkhol" : "Create Account"}
           </button>
         </form>
 
