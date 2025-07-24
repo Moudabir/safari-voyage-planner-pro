@@ -192,7 +192,7 @@ const Index = () => {
   };
 
   return (
-<div className="min-h-screen bg-green-50"> // Vert clair
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-gradient-safari text-white p-4 md:p-6 shadow-safari">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
