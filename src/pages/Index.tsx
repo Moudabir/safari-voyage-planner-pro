@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Users, Banknote, Calendar, MapPin, Clock, Activity, MessageCircle, Download, Upload, LogOut } from "lucide-react";
+import { Users, Banknote, Calendar, MapPin, Clock, Activity, MessageCircle, Download, Upload, LogOut, Menu } from "lucide-react";
 import { AttendeeTracker } from "@/components/AttendeeTracker";
 import { ExpenseTracker } from "@/components/ExpenseTracker";
 import { ScheduleManager } from "@/components/ScheduleManager";
 import { TripSummary } from "@/components/TripSummary";
 import { TripSelector } from "@/components/TripSelector";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useTrip } from "@/hooks/useTrip";
@@ -196,22 +197,34 @@ const Index = () => {
               <p className="text-sm md:text-lg opacity-90">Your Ultimate Travel Companion</p>
               <p className="text-xs md:text-sm opacity-75">Welcome back, {user.email}</p>
             </div>
-            <TripSelector trips={allTrips} currentTrip={currentTrip} onTripSelect={selectTrip} onTripsUpdate={refreshTrips} />
           </div>
           <div className="flex flex-wrap gap-2 md:space-x-3 w-full md:w-auto">
             <input type="file" accept=".csv" onChange={importFromCSV} style={{
             display: 'none'
           }} id="csv-import" />
             
-            <Button onClick={exportToCSV} className="bg-white text-safari-green hover:bg-white/90 font-semibold text-sm px-3 py-2 md:px-4 md:py-2">
-              <Download className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
-              <span className="hidden sm:inline">Export</span>
-            </Button>
-            
-            <Button onClick={signOut} className="bg-white text-safari-green hover:bg-white/90 font-semibold text-sm px-3 py-2 md:px-4 md:py-2">
-              <LogOut className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
-              <span className="hidden sm:inline">Sign Out</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="bg-white text-safari-green hover:bg-white/90 font-semibold text-sm px-3 py-2 md:px-4 md:py-2">
+                  <Menu className="h-3 w-3 md:h-4 md:w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-white">
+                <div className="p-2">
+                  <TripSelector trips={allTrips} currentTrip={currentTrip} onTripSelect={selectTrip} onTripsUpdate={refreshTrips} />
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={exportToCSV} className="cursor-pointer">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Data
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={signOut} className="cursor-pointer">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
