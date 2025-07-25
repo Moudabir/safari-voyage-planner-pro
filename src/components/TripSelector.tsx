@@ -118,7 +118,7 @@ export const TripSelector = ({
   };
   return <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="bg-white text-safari-green hover:bg-white/90 font-semibold">
+        <Button variant="outline" className="bg-white text-safari-green hover:bg-safari-cream hover:text-safari-green font-semibold">
           <MapPin className="h-4 w-4 mr-2" />
           {currentTrip?.name || "Select Trip"}
         </Button>
