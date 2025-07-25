@@ -18,12 +18,26 @@ import { useTabPersistence } from "@/hooks/useTabPersistence";
 import { useDataLoader } from "@/hooks/useDataLoader";
 import safariLogo from "@/assets/safari-logo.png";
 import { useState } from "react";
-
 const Index = () => {
-  const { toast } = useToast();
-  const { user, loading: authLoading, signOut } = useAuth();
-  const { currentTrip, allTrips, loading: tripLoading, selectTrip, refreshTrips } = useTrip();
-  const { activeTab, updateActiveTab } = useTabPersistence("summary");
+  const {
+    toast
+  } = useToast();
+  const {
+    user,
+    loading: authLoading,
+    signOut
+  } = useAuth();
+  const {
+    currentTrip,
+    allTrips,
+    loading: tripLoading,
+    selectTrip,
+    refreshTrips
+  } = useTrip();
+  const {
+    activeTab,
+    updateActiveTab
+  } = useTabPersistence("summary");
   const {
     attendees,
     expenses,
@@ -33,40 +47,35 @@ const Index = () => {
     updateExpenses,
     updateSchedule
   } = useDataLoader(currentTrip, user, tripLoading);
-  
   const navigate = useNavigate();
-
   useEffect(() => {
     if (!authLoading && !user) {
       console.log('User not authenticated, redirecting to auth');
       navigate("/auth");
     }
   }, [user, authLoading, navigate]);
-
   if (authLoading || tripLoading || dataLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+    return <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
           <p className="mt-4 text-muted-foreground">
             {authLoading ? "Authenticating..." : tripLoading ? "Loading trip..." : "Loading your data..."}
           </p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (!user || !currentTrip) {
     return null;
   }
-
   const confirmedAttendees = attendees.length;
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
   const upcomingActivities = schedule.filter(item => new Date(item.date) >= new Date()).length;
 
   // CSV Export Functions
   const downloadCSV = (data: string, filename: string) => {
-    const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([data], {
+      type: 'text/csv;charset=utf-8;'
+    });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
@@ -76,24 +85,11 @@ const Index = () => {
     link.click();
     document.body.removeChild(link);
   };
-
   const exportToCSV = () => {
     try {
-      const attendeesCSV = [
-        ['Type', 'Name', 'Email', 'Phone'].join(','),
-        ...attendees.map(a => ['attendee', `"${a.name}"`, `"${a.email || ''}"`, `"${a.phone || ''}"`].join(','))
-      ].join('\n');
-
-      const expensesCSV = [
-        ['Type', 'Category', 'Amount', 'Description', 'Paid By', 'Date'].join(','),
-        ...expenses.map(e => ['expense', e.category, e.amount, `"${e.description}"`, `"${e.paid_by}"`, e.created_at.split('T')[0]].join(','))
-      ].join('\n');
-
-      const scheduleCSV = [
-        ['Type', 'Title', 'Time', 'Date', 'Schedule Type', 'Location', 'Pictures'].join(','),
-        ...schedule.map(s => ['schedule', `"${s.title}"`, s.time, s.date, s.type, `"${s.location}"`, `"${(s.pictures || []).join(';')}"`].join('\n'))
-      ].join('\n');
-
+      const attendeesCSV = [['Type', 'Name', 'Email', 'Phone'].join(','), ...attendees.map(a => ['attendee', `"${a.name}"`, `"${a.email || ''}"`, `"${a.phone || ''}"`].join(','))].join('\n');
+      const expensesCSV = [['Type', 'Category', 'Amount', 'Description', 'Paid By', 'Date'].join(','), ...expenses.map(e => ['expense', e.category, e.amount, `"${e.description}"`, `"${e.paid_by}"`, e.created_at.split('T')[0]].join(','))].join('\n');
+      const scheduleCSV = [['Type', 'Title', 'Time', 'Date', 'Schedule Type', 'Location', 'Pictures'].join(','), ...schedule.map(s => ['schedule', `"${s.title}"`, s.time, s.date, s.type, `"${s.location}"`, `"${(s.pictures || []).join(';')}"`].join('\n'))].join('\n');
       const allData = [attendeesCSV, expensesCSV, scheduleCSV].join('\n');
       downloadCSV(allData, 'safari-trip-data.csv');
       toast({
@@ -108,19 +104,15 @@ const Index = () => {
       });
     }
   };
-
   const parseCSV = (csvText: string) => {
     const lines = csvText.split('\n').filter(line => line.trim());
     const newAttendees: any[] = [];
     const newExpenses: any[] = [];
     const newSchedule: any[] = [];
-
     lines.forEach((line, index) => {
       if (index === 0 || !line.trim()) return;
-
       const values = line.split(',').map(val => val.replace(/^"/, '').replace(/"$/, ''));
       const type = values[0];
-
       try {
         if (type === 'attendee' && values.length >= 4) {
           newAttendees.push({
@@ -158,24 +150,27 @@ const Index = () => {
         console.warn(`Error parsing line ${index + 1}:`, line);
       }
     });
-
-    return { newAttendees, newExpenses, newSchedule };
+    return {
+      newAttendees,
+      newExpenses,
+      newSchedule
+    };
   };
-
   const importFromCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       try {
         const csvText = e.target?.result as string;
-        const { newAttendees, newExpenses, newSchedule } = parseCSV(csvText);
-
+        const {
+          newAttendees,
+          newExpenses,
+          newSchedule
+        } = parseCSV(csvText);
         updateAttendees([...attendees, ...newAttendees]);
         updateExpenses([...expenses, ...newExpenses]);
         updateSchedule([...schedule, ...newSchedule]);
-
         toast({
           title: "Data Imported",
           description: `Imported ${newAttendees.length} attendees, ${newExpenses.length} expenses, and ${newSchedule.length} schedule items.`
@@ -191,11 +186,9 @@ const Index = () => {
     reader.readAsText(file);
     event.target.value = '';
   };
-
-  return (
-<div className="min-h-screen bg-green-50">
+  return <div className="min-h-screen bg-green-50">
       {/* Header */}
-<div className="bg-gradient-to-r from-green-600 to-teal-600 text-white p-4 md:p-6 shadow-lg">
+    <div className="bg-gradient-to-r from-green-600 to-teal-600 text-white p-4 md:p-6 shadow-lg">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
           <div className="flex items-center space-x-4">
             <div>
@@ -203,40 +196,19 @@ const Index = () => {
               <p className="text-sm md:text-lg opacity-90">Your Ultimate Travel Companion</p>
               <p className="text-xs md:text-sm opacity-75">Welcome back, {user.email}</p>
             </div>
-            <TripSelector 
-              trips={allTrips}
-              currentTrip={currentTrip}
-              onTripSelect={selectTrip}
-              onTripsUpdate={refreshTrips}
-            />
+            <TripSelector trips={allTrips} currentTrip={currentTrip} onTripSelect={selectTrip} onTripsUpdate={refreshTrips} />
           </div>
           <div className="flex flex-wrap gap-2 md:space-x-3 w-full md:w-auto">
-            <input
-              type="file"
-              accept=".csv"
-              onChange={importFromCSV}
-              style={{ display: 'none' }}
-              id="csv-import"
-            />
-            <Button
-              onClick={() => document.getElementById('csv-import')?.click()}
-              className="bg-white text-safari-green hover:bg-white/90 font-semibold text-sm px-3 py-2 md:px-4 md:py-2"
-            >
-              <Upload className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
-              <span className="hidden sm:inline">Import</span>
-            </Button>
-            <Button
-              onClick={exportToCSV}
-              className="bg-white text-safari-green hover:bg-white/90 font-semibold text-sm px-3 py-2 md:px-4 md:py-2"
-            >
+            <input type="file" accept=".csv" onChange={importFromCSV} style={{
+            display: 'none'
+          }} id="csv-import" />
+            
+            <Button onClick={exportToCSV} className="bg-white text-safari-green hover:bg-white/90 font-semibold text-sm px-3 py-2 md:px-4 md:py-2">
               <Download className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
               <span className="hidden sm:inline">Export</span>
             </Button>
             
-            <Button
-              onClick={signOut}
-              className="bg-white text-safari-green hover:bg-white/90 font-semibold text-sm px-3 py-2 md:px-4 md:py-2"
-            >
+            <Button onClick={signOut} className="bg-white text-safari-green hover:bg-white/90 font-semibold text-sm px-3 py-2 md:px-4 md:py-2">
               <LogOut className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
               <span className="hidden sm:inline">Sign Out</span>
             </Button>
@@ -371,29 +343,21 @@ const Index = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {attendees.length === 0 && expenses.length === 0 && schedule.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-4">
+                    {attendees.length === 0 && expenses.length === 0 && schedule.length === 0 ? <p className="text-muted-foreground text-center py-4">
                         No recent activity. Start by adding attendees!
-                      </p>
-                    ) : (
-                      <>
-                        {attendees.slice(0, 3).map(attendee => (
-                          <div key={attendee.id} className="flex items-center space-x-3">
+                      </p> : <>
+                        {attendees.slice(0, 3).map(attendee => <div key={attendee.id} className="flex items-center space-x-3">
                             <div className="w-2 h-2 bg-safari-green rounded-full" />
                             <span className="text-sm">{attendee.name} joined the trip</span>
                             <Badge variant="default">Confirmed</Badge>
-                          </div>
-                        ))}
-                        {expenses.slice(0, 2).map(expense => (
-                          <div key={expense.id} className="flex items-center space-x-3">
+                          </div>)}
+                        {expenses.slice(0, 2).map(expense => <div key={expense.id} className="flex items-center space-x-3">
                             <div className="w-2 h-2 bg-safari-orange rounded-full" />
                             <span className="text-sm">
                               {expense.amount} DH added to {expense.category}
                             </span>
-                          </div>
-                        ))}
-                      </>
-                    )}
+                          </div>)}
+                      </>}
                   </div>
                 </CardContent>
               </Card>
@@ -401,8 +365,6 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
