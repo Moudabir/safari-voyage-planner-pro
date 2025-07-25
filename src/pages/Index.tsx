@@ -10,6 +10,7 @@ import { AttendeeTracker } from "@/components/AttendeeTracker";
 import { ExpenseTracker } from "@/components/ExpenseTracker";
 import { ScheduleManager } from "@/components/ScheduleManager";
 import { TripSummary } from "@/components/TripSummary";
+import { TripSelector } from "@/components/TripSelector";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useTrip } from "@/hooks/useTrip";
@@ -21,7 +22,7 @@ import { useState } from "react";
 const Index = () => {
   const { toast } = useToast();
   const { user, loading: authLoading, signOut } = useAuth();
-  const { currentTrip, loading: tripLoading } = useTrip();
+  const { currentTrip, allTrips, loading: tripLoading, selectTrip, refreshTrips } = useTrip();
   const { activeTab, updateActiveTab } = useTabPersistence("summary");
   const {
     attendees,
@@ -196,10 +197,18 @@ const Index = () => {
       {/* Header */}
 <div className="bg-gradient-to-r from-green-600 to-teal-600 text-white p-4 md:p-6 shadow-lg">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
-          <div>
-            <img src={safariLogo} alt="Safari" className="h-16 md:h-20 mb-1 md:mb-2" />
-            <p className="text-sm md:text-lg opacity-90">Your Ultimate Travel Companion</p>
-            <p className="text-xs md:text-sm opacity-75">Welcome back, {user.email}</p>
+          <div className="flex items-center space-x-4">
+            <div>
+              <img src={safariLogo} alt="Safari" className="h-16 md:h-20 mb-1 md:mb-2" />
+              <p className="text-sm md:text-lg opacity-90">Your Ultimate Travel Companion</p>
+              <p className="text-xs md:text-sm opacity-75">Welcome back, {user.email}</p>
+            </div>
+            <TripSelector 
+              trips={allTrips}
+              currentTrip={currentTrip}
+              onTripSelect={selectTrip}
+              onTripsUpdate={refreshTrips}
+            />
           </div>
           <div className="flex flex-wrap gap-2 md:space-x-3 w-full md:w-auto">
             <input
