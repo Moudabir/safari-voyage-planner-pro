@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, Calendar, Clock, MapPin, Users, Activity, Camera, Image, Edit2, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Trash2, Plus, Calendar, Clock, MapPin, Users, Activity, Camera, Image, Edit2, ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -41,6 +41,10 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [loading, setLoading] = useState(false);
   const [newItem, setNewItem] = useState<{
     title: string;
@@ -333,15 +337,21 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
   const openGallery = (pictures: string[], startIndex: number = 0) => {
     setGalleryImages(pictures);
     setCurrentImageIndex(startIndex);
+    setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
     setIsGalleryOpen(true);
   };
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length);
+    setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
   };
 
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+    setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
   };
 
   const sortedSchedule = [...schedule].sort((a, b) => {
@@ -791,6 +801,38 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
                 <span className="text-sm text-muted-foreground">
                   {currentImageIndex + 1} of {galleryImages.length}
                 </span>
+                {/* Zoom Controls */}
+                <div className="flex items-center space-x-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.25))}
+                    disabled={zoomLevel <= 0.5}
+                  >
+                    <ZoomOut className="h-4 w-4" />
+                  </Button>
+                  <span className="text-xs text-muted-foreground min-w-[3rem] text-center">
+                    {Math.round(zoomLevel * 100)}%
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setZoomLevel(Math.min(3, zoomLevel + 0.25))}
+                    disabled={zoomLevel >= 3}
+                  >
+                    <ZoomIn className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setZoomLevel(1);
+                      setPanOffset({ x: 0, y: 0 });
+                    }}
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -805,11 +847,39 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
             {galleryImages.length > 0 && (
               <>
                 {/* Main Image */}
-                <div className="flex-1 flex items-center justify-center">
+                <div 
+                  className="flex-1 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing"
+                  onMouseDown={(e) => {
+                    if (zoomLevel > 1) {
+                      setIsDragging(true);
+                      setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+                    }
+                  }}
+                  onMouseMove={(e) => {
+                    if (isDragging && zoomLevel > 1) {
+                      setPanOffset({
+                        x: e.clientX - dragStart.x,
+                        y: e.clientY - dragStart.y
+                      });
+                    }
+                  }}
+                  onMouseUp={() => setIsDragging(false)}
+                  onMouseLeave={() => setIsDragging(false)}
+                  onWheel={(e) => {
+                    e.preventDefault();
+                    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                    setZoomLevel(Math.max(0.5, Math.min(3, zoomLevel + delta)));
+                  }}
+                >
                   <img
                     src={galleryImages[currentImageIndex]}
                     alt={`Image ${currentImageIndex + 1}`}
-                    className="max-w-full max-h-[60vh] object-contain rounded-lg"
+                    className="max-w-full max-h-[60vh] object-contain rounded-lg transition-transform duration-200 select-none"
+                    style={{
+                      transform: `scale(${zoomLevel}) translate(${panOffset.x / zoomLevel}px, ${panOffset.y / zoomLevel}px)`,
+                      transformOrigin: 'center center'
+                    }}
+                    draggable={false}
                   />
                 </div>
 
@@ -850,7 +920,11 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
                         ? 'ring-2 ring-safari-green'
                         : 'opacity-60 hover:opacity-80'
                     }`}
-                    onClick={() => setCurrentImageIndex(index)}
+                    onClick={() => {
+                      setCurrentImageIndex(index);
+                      setZoomLevel(1);
+                      setPanOffset({ x: 0, y: 0 });
+                    }}
                   >
                     <img
                       src={image}
