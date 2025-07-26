@@ -22,10 +22,18 @@ interface Expense {
   created_at: string;
 }
 
+interface Attendee {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+}
+
 interface ExpenseTrackerProps {
   expenses: Expense[];
   setExpenses: (expenses: Expense[]) => void;
   tripId: string;
+  attendees: Attendee[];
 }
 
 const categoryIcons = {
@@ -49,7 +57,8 @@ const categoryColors = {
 export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ 
   expenses, 
   setExpenses, 
-  tripId 
+  tripId,
+  attendees 
 }) => {
   const [isAddingExpense, setIsAddingExpense] = useState(false);
   const [isEditingExpense, setIsEditingExpense] = useState(false);
@@ -304,12 +313,20 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
               </div>
               <div>
                 <Label htmlFor="paid_by">Paid By</Label>
-                <Input
-                  id="paid_by"
-                  placeholder="Who paid for this?"
-                  value={newExpense.paid_by}
-                  onChange={(e) => setNewExpense({...newExpense, paid_by: e.target.value})}
-                />
+                <Select value={newExpense.paid_by} onValueChange={(value) => 
+                  setNewExpense({...newExpense, paid_by: value})
+                }>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select who paid" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {attendees.map((attendee) => (
+                      <SelectItem key={attendee.id} value={attendee.name}>
+                        {attendee.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <Button 
                 onClick={handleAddExpense} 
@@ -492,12 +509,20 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
             </div>
             <div>
               <Label htmlFor="edit-paid_by">Paid By</Label>
-              <Input
-                id="edit-paid_by"
-                placeholder="Who paid for this?"
-                value={editForm.paid_by}
-                onChange={(e) => setEditForm({...editForm, paid_by: e.target.value})}
-              />
+              <Select value={editForm.paid_by} onValueChange={(value) => 
+                setEditForm({...editForm, paid_by: value})
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select who paid" />
+                </SelectTrigger>
+                <SelectContent>
+                  {attendees.map((attendee) => (
+                    <SelectItem key={attendee.id} value={attendee.name}>
+                      {attendee.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button 
               onClick={handleUpdateExpense} 

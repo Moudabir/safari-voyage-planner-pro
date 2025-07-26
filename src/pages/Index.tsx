@@ -315,7 +315,7 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="expenses" className="mt-6">
-            <ExpenseTracker expenses={expenses} setExpenses={updateExpenses} tripId={currentTrip.id} />
+            <ExpenseTracker expenses={expenses} setExpenses={updateExpenses} tripId={currentTrip.id} attendees={attendees} />
           </TabsContent>
 
           <TabsContent value="schedule" className="mt-6">
