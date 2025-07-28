@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Users, Banknote, Calendar, MapPin, Clock, Activity, MessageCircle, Download, Upload, LogOut, Menu } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { AttendeeTracker } from "@/components/AttendeeTracker";
 import { ExpenseTracker } from "@/components/ExpenseTracker";
 import { ScheduleManager } from "@/components/ScheduleManager";
@@ -187,9 +188,9 @@ const Index = () => {
     reader.readAsText(file);
     event.target.value = '';
   };
-  return <div className="min-h-screen bg-green-50">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
-    <div className="bg-gradient-to-r from-green-600 to-teal-600 text-white p-4 md:p-6 shadow-lg">
+    <div className="bg-gradient-safari text-white p-4 md:p-6 shadow-safari">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
           <div className="flex items-center space-x-4">
             <div>
@@ -202,6 +203,8 @@ const Index = () => {
             <input type="file" accept=".csv" onChange={importFromCSV} style={{
             display: 'none'
           }} id="csv-import" />
+            
+            <ThemeToggle />
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

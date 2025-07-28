@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/ThemeToggle";
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -103,9 +104,12 @@ const Auth = () => {
     }
   };
   const handleSubmit = mode === "signin" ? handleSignIn : handleSignUp;
-  return <div className="min-h-screen bg-background flex items-center justify-center p-5">
+  return <div className="min-h-screen bg-background flex items-center justify-center p-5 relative">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="brutalist-card w-full max-w-md">
-        <h1 className="brutalist-title text-slate-700">
+        <h1 className="brutalist-title">
           {mode === "signin" ? "Dkhol" : "Create Account"}
         </h1>
         
@@ -120,7 +124,7 @@ const Auth = () => {
             <input id="password" type="password" placeholder={mode === "signup" ? "Create a password (min 6 characters)" : "Enter your password"} value={password} onChange={e => setPassword(e.target.value)} required minLength={mode === "signup" ? 6 : undefined} className="brutalist-input" />
           </div>
           
-          <button type="submit" disabled={loading} className="brutalist-button mt-4 bg-lime-800 hover:bg-lime-700">
+          <button type="submit" disabled={loading} className="brutalist-button mt-4">
             {loading ? mode === "signin" ? "Signing In..." : "Creating Account..." : mode === "signin" ? "Dkhol mn hna" : "Create Account"}
           </button>
         </form>
