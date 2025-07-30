@@ -20,7 +20,7 @@ export function ThemeToggle() {
     if (theme === "light") return <Sun className="h-4 w-4" />;
     return <Sun className="h-4 w-4" />; // system defaults to sun
   };
-  return <Button variant="outline" size="icon" onClick={toggleTheme} title={`Current theme: ${theme}. Click to cycle through themes.`} className="relative text-slate-600 bg-gray-300 hover:bg-gray-200">
+  return <Button variant="outline" size="icon" onClick={toggleTheme} title={`Current theme: ${theme}. Click to cycle through themes.`} className="relative text-slate-600 rounded-3xl bg-lime-300 hover:bg-lime-200">
       {getIcon()}
       <span className="sr-only">Toggle theme</span>
     </Button>;
