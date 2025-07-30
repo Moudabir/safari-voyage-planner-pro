@@ -217,12 +217,12 @@ const Index = () => {
                   <TripSelector trips={allTrips} currentTrip={currentTrip} onTripSelect={selectTrip} onTripsUpdate={refreshTrips} />
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={exportToCSV} className="cursor-pointer">
+                <DropdownMenuItem onClick={exportToCSV} className="cursor-pointer bg-gray-500 rounded-full">
                   <Download className="h-4 w-4 mr-2" />
                   Export Data
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={signOut} className="cursor-pointer">
+                <DropdownMenuItem onClick={signOut} className="cursor-pointer bg-red-500 rounded-full">
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
                 </DropdownMenuItem>
