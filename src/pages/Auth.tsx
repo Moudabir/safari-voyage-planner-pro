@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, MapPin, Users, Banknote } from "lucide-react";
+import safariLogo from "@/assets/safari-logo.png";
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -104,57 +107,131 @@ const Auth = () => {
     }
   };
   const handleSubmit = mode === "signin" ? handleSignIn : handleSignUp;
-  return <div className="min-h-screen bg-background flex items-center justify-center p-5 relative">
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
+  return <div className="min-h-screen bg-background flex">
+      {/* Left Side - Safari Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-safari text-white p-12 flex-col justify-center relative overflow-hidden">
+        <div className="absolute top-6 left-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate("/")}
+            className="text-white hover:bg-white/20 p-2"
+          >
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            Back to Home
+          </Button>
+        </div>
+        
+        <div className="relative z-10">
+          <div className="flex items-center space-x-4 mb-8">
+            <img src={safariLogo} alt="Safari" className="h-20 w-20" />
+            <div>
+              <h1 className="text-4xl font-bold">Safari</h1>
+              <p className="text-safari-cream text-lg">Your Ultimate Travel Companion</p>
+            </div>
+          </div>
+          
+          <div className="space-y-6">
+            <h2 className="text-3xl font-bold leading-tight">
+              Turn Your Travel Dreams Into Reality
+            </h2>
+            <p className="text-xl opacity-90">
+              Join thousands of adventurers who trust Safari to organize unforgettable group trips. 
+              From budget tracking to itinerary planning, we've got everything covered.
+            </p>
+            
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <Users className="h-6 w-6 text-safari-cream" />
+                <span className="text-lg">Smart attendee management</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Banknote className="h-6 w-6 text-safari-cream" />
+                <span className="text-lg">Transparent budget tracking</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <MapPin className="h-6 w-6 text-safari-cream" />
+                <span className="text-lg">Collaborative trip planning</span>
+              </div>
+            </div>
+            
+            <div className="pt-6">
+              <p className="text-safari-cream text-lg italic">
+                "Safari made organizing our 20-person Morocco adventure effortless!"
+              </p>
+              <p className="text-sm opacity-75 mt-2">— Sarah, Adventure Enthusiast</p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Decorative elements */}
+        <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full"></div>
+        <div className="absolute bottom-20 right-20 w-20 h-20 bg-safari-cream/20 rounded-full"></div>
       </div>
-      <div className="brutalist-card w-full max-w-md">
-        <h1 className="brutalist-title">
-          {mode === "signin" ? "Dkhol" : "Create Account"}
-        </h1>
-        
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label htmlFor="email" className="brutalist-label">Dak lEmail</label>
-            <input id="email" type="email" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} required className="brutalist-input" />
-          </div>
-          
-          <div>
-            <label htmlFor="password" className="brutalist-label">Secret Password</label>
-            <input id="password" type="password" placeholder={mode === "signup" ? "Create a password (min 6 characters)" : "Enter your password"} value={password} onChange={e => setPassword(e.target.value)} required minLength={mode === "signup" ? 6 : undefined} className="brutalist-input" />
-          </div>
-          
-          <button type="submit" disabled={loading} className="brutalist-button mt-4">
-            {loading ? mode === "signin" ? "Signing In..." : "Creating Account..." : mode === "signin" ? "Dkhol mn hna" : "Create Account"}
-          </button>
-        </form>
 
-        <div className="flex items-center my-6 text-foreground font-bold">
-          <div className="flex-1 border-b-2 border-primary mr-3"></div>
-          <span>Wla</span>
-          <div className="flex-1 border-b-2 border-primary ml-3"></div>
+      {/* Right Side - Auth Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle />
+        </div>
+        
+        {/* Mobile back button */}
+        <div className="absolute top-4 left-4 lg:hidden">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate("/")}
+            className="p-2"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
         </div>
 
-        
+        <div className="brutalist-card w-full max-w-md">
+          <h1 className="brutalist-title">
+            {mode === "signin" ? "Welcome Back" : "Join Safari"}
+          </h1>
+          
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label htmlFor="email" className="brutalist-label">Email Address</label>
+              <input id="email" type="email" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} required className="brutalist-input" />
+            </div>
+            
+            <div>
+              <label htmlFor="password" className="brutalist-label">Password</label>
+              <input id="password" type="password" placeholder={mode === "signup" ? "Create a password (min 6 characters)" : "Enter your password"} value={password} onChange={e => setPassword(e.target.value)} required minLength={mode === "signup" ? 6 : undefined} className="brutalist-input" />
+            </div>
+            
+            <button type="submit" disabled={loading} className="brutalist-button mt-4">
+              {loading ? mode === "signin" ? "Signing In..." : "Creating Account..." : mode === "signin" ? "Sign In to Safari" : "Start Your Adventure"}
+            </button>
+          </form>
 
-        <div className="text-center">
-          <p className="text-foreground mb-4">
-            {mode === "signin" ? "Don't have an account?" : "Already have an account?"}
-          </p>
-          <button type="button" onClick={() => {
-          setMode(mode === "signin" ? "signup" : "signin");
-          setEmail("");
-          setPassword("");
-        }} className="brutalist-button bg-secondary text-foreground border-2 border-primary hover:shadow-brutal-hover hover:-translate-x-0.5 hover:-translate-y-0.5">
-            {mode === "signin" ? "Create New Account" : "Sign In Instead"}
-          </button>
-        </div>
+          <div className="flex items-center my-6 text-foreground font-bold">
+            <div className="flex-1 border-b-2 border-primary mr-3"></div>
+            <span>or</span>
+            <div className="flex-1 border-b-2 border-primary ml-3"></div>
+          </div>
 
-        <div className="text-center mt-5">
-          <p className="text-foreground">
-            <strong>Safari Trip Planner</strong>
-          </p>
-          <p className="text-foreground text-sm mt-1">Chi tsafira ela 79ha wtri9ha</p>
+          <div className="text-center">
+            <p className="text-foreground mb-4">
+              {mode === "signin" ? "New to Safari?" : "Already have an account?"}
+            </p>
+            <button type="button" onClick={() => {
+            setMode(mode === "signin" ? "signup" : "signin");
+            setEmail("");
+            setPassword("");
+          }} className="brutalist-button bg-secondary text-foreground border-2 border-primary hover:shadow-brutal-hover hover:-translate-x-0.5 hover:-translate-y-0.5">
+              {mode === "signin" ? "Create Account" : "Sign In Instead"}
+            </button>
+          </div>
+
+          <div className="text-center mt-6 lg:hidden">
+            <div className="flex items-center justify-center space-x-2 mb-2">
+              <img src={safariLogo} alt="Safari" className="h-8 w-8" />
+              <span className="text-lg font-bold text-safari-green">Safari</span>
+            </div>
+            <p className="text-foreground text-sm">Your Ultimate Travel Companion</p>
+          </div>
         </div>
       </div>
     </div>;
