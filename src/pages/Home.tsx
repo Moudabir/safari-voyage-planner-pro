@@ -184,7 +184,7 @@ const Home = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">Get support or share feedback</p>
-                <p className="font-semibold text-safari-green">Mo.moudabir@gmail.com</p>
+                <p className="font-semibold text-safari-green">hello@safari-trips.com</p>
               </CardContent>
             </Card>
 
@@ -197,7 +197,7 @@ const Home = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">Speak with our travel experts</p>
-                <p className="font-semibold text-safari-green">Coming soon..</p>
+                <p className="font-semibold text-safari-green">+1 (555) 123-TRIP</p>
               </CardContent>
             </Card>
 
@@ -210,7 +210,7 @@ const Home = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">Come say hello in person</p>
-                <p className="font-semibold text-safari-green">Coming soon..</p>
+                <p className="font-semibold text-safari-green">San Francisco, CA</p>
               </CardContent>
             </Card>
           </div>
@@ -223,7 +223,7 @@ const Home = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
               <img src={safariLogo} alt="Safari" className="h-8 w-8" />
-              
+              <span className="text-lg font-bold text-safari-green">Safari</span>
             </div>
             <div className="flex items-center space-x-6">
               <a href="#" className="text-muted-foreground hover:text-safari-green transition-colors">
