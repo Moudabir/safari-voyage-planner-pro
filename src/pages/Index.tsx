@@ -52,8 +52,8 @@ const Index = () => {
   const navigate = useNavigate();
   useEffect(() => {
     if (!authLoading && !user) {
-      console.log('User not authenticated, redirecting to auth');
-      navigate("/auth");
+      console.log('User not authenticated, redirecting to home');
+      navigate("/");
     }
   }, [user, authLoading, navigate]);
   if (authLoading || tripLoading || dataLoading) {

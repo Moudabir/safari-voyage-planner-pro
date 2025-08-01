@@ -21,7 +21,7 @@ const Auth = () => {
         }
       } = await supabase.auth.getSession();
       if (session?.user) {
-        navigate("/");
+        navigate("/dashboard");
       }
     };
     checkUser();
@@ -30,7 +30,7 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/dashboard`;
       const {
         error
       } = await supabase.auth.signUp({
@@ -72,7 +72,7 @@ const Auth = () => {
           title: "Welcome back!",
           description: "You have been signed in successfully."
         });
-        navigate("/");
+        navigate("/dashboard");
       }
     } catch (error: any) {
       toast({
@@ -91,7 +91,7 @@ const Auth = () => {
       } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`
+          redirectTo: `${window.location.origin}/dashboard`
         }
       });
       if (error) throw error;
