@@ -165,7 +165,7 @@ const Auth = () => {
       </div>
 
       {/* Right Side - Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative bg-slate-800">
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
