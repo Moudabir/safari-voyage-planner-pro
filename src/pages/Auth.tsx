@@ -187,50 +187,50 @@ const Auth = () => {
 
         <div className="brutalist-card w-full max-w-md">
           <h1 className="brutalist-title">
-            {mode === "signin" ? "Welcome Back" : "Join Safari"}
+            Dkhol
           </h1>
           
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="email" className="brutalist-label">Email Address</label>
+              <label htmlFor="email" className="brutalist-label">Dak lEmail</label>
               <input id="email" type="email" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} required className="brutalist-input" />
             </div>
             
             <div>
-              <label htmlFor="password" className="brutalist-label">Password</label>
-              <input id="password" type="password" placeholder={mode === "signup" ? "Create a password (min 6 characters)" : "Enter your password"} value={password} onChange={e => setPassword(e.target.value)} required minLength={mode === "signup" ? 6 : undefined} className="brutalist-input" />
+              <label htmlFor="password" className="brutalist-label">Secret Password</label>
+              <input id="password" type="password" placeholder="Enter your password" value={password} onChange={e => setPassword(e.target.value)} required minLength={mode === "signup" ? 6 : undefined} className="brutalist-input" />
             </div>
             
             <button type="submit" disabled={loading} className="brutalist-button mt-4">
-              {loading ? mode === "signin" ? "Signing In..." : "Creating Account..." : mode === "signin" ? "Sign In to Safari" : "Start Your Adventure"}
+              Dkhol mn hna
             </button>
           </form>
 
           <div className="flex items-center my-6 text-foreground font-bold">
             <div className="flex-1 border-b-2 border-primary mr-3"></div>
-            <span>or</span>
+            <span>Wla</span>
             <div className="flex-1 border-b-2 border-primary ml-3"></div>
           </div>
 
           <div className="text-center">
             <p className="text-foreground mb-4">
-              {mode === "signin" ? "New to Safari?" : "Already have an account?"}
+              Don't have an account?
             </p>
             <button type="button" onClick={() => {
             setMode(mode === "signin" ? "signup" : "signin");
             setEmail("");
             setPassword("");
           }} className="brutalist-button bg-secondary text-foreground border-2 border-primary hover:shadow-brutal-hover hover:-translate-x-0.5 hover:-translate-y-0.5">
-              {mode === "signin" ? "Create Account" : "Sign In Instead"}
+              Create New Account
             </button>
           </div>
 
-          <div className="text-center mt-6 lg:hidden">
+          <div className="text-center mt-6">
             <div className="flex items-center justify-center space-x-2 mb-2">
               <img src={safariLogo} alt="Safari" className="h-8 w-8" />
-              <span className="text-lg font-bold text-safari-green">Safari</span>
+              <span className="text-lg font-bold text-safari-green">Safari Trip Planner</span>
             </div>
-            <p className="text-foreground text-sm">Your Ultimate Travel Companion</p>
+            <p className="text-foreground text-sm">chi ssafra zia 78ha wri95ha</p>
           </div>
         </div>
       </div>
