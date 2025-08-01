@@ -111,11 +111,7 @@ const Auth = () => {
       {/* Left Side - Safari Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-safari text-white p-12 flex-col justify-center relative overflow-hidden">
         <div className="absolute top-6 left-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate("/")}
-            className="text-white hover:bg-white/20 p-2"
-          >
+          <Button variant="ghost" onClick={() => navigate("/")} className="text-white hover:bg-white/20 p-2">
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back to Home
           </Button>
@@ -176,11 +172,7 @@ const Auth = () => {
         
         {/* Mobile back button */}
         <div className="absolute top-4 left-4 lg:hidden">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate("/")}
-            className="p-2"
-          >
+          <Button variant="ghost" onClick={() => navigate("/")} className="p-2">
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </div>
@@ -201,7 +193,7 @@ const Auth = () => {
               <input id="password" type="password" placeholder="Enter your password" value={password} onChange={e => setPassword(e.target.value)} required minLength={mode === "signup" ? 6 : undefined} className="brutalist-input" />
             </div>
             
-            <button type="submit" disabled={loading} className="brutalist-button mt-4">
+            <button type="submit" disabled={loading} className="brutalist-button mt-4 bg-orange-700 hover:bg-orange-600">
               Dkhol mn hna
             </button>
           </form>
