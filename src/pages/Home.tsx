@@ -52,7 +52,7 @@ const Home = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
               <img src={safariLogo} alt="Safari" className="h-10 w-10" />
-              <span className="text-xl font-bold text-safari-green">Safari</span>
+              
             </div>
             <div className="flex items-center space-x-4">
               <ThemeToggle />
