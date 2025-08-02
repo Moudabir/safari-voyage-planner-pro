@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,8 @@ import { useDataLoader } from "@/hooks/useDataLoader";
 import safariLogo from "@/assets/safari-logo.png";
 import { useState } from "react";
 const Index = () => {
+  const [whatsappLink, setWhatsappLink] = useState("");
+  const [isEditingWhatsapp, setIsEditingWhatsapp] = useState(false);
   const {
     toast
   } = useToast();
@@ -188,6 +191,24 @@ const Index = () => {
     reader.readAsText(file);
     event.target.value = '';
   };
+
+  const handleWhatsappSave = () => {
+    if (whatsappLink.trim()) {
+      setIsEditingWhatsapp(false);
+      toast({
+        title: "WhatsApp Link Saved",
+        description: "Group link has been saved successfully."
+      });
+    }
+  };
+
+  const openWhatsappGroup = () => {
+    if (whatsappLink) {
+      window.open(whatsappLink, '_blank');
+    } else {
+      setIsEditingWhatsapp(true);
+    }
+  };
   return <div className="min-h-screen bg-background font-roboto">
       {/* Header */}
     <div className="bg-gradient-safari text-white p-4 md:p-6 shadow-safari">
@@ -199,6 +220,35 @@ const Index = () => {
               <p className="text-xs md:text-sm opacity-75">Welcome back, {user.email}</p>
             </div>
           </div>
+          
+          {/* WhatsApp Group Button */}
+          <div className="flex items-center justify-center flex-1 mx-4">
+            {isEditingWhatsapp ? (
+              <div className="flex items-center space-x-2">
+                <Input
+                  placeholder="Enter WhatsApp group link"
+                  value={whatsappLink}
+                  onChange={(e) => setWhatsappLink(e.target.value)}
+                  className="bg-white text-black placeholder:text-gray-500 min-w-[200px]"
+                />
+                <Button onClick={handleWhatsappSave} className="bg-green-500 hover:bg-green-600 text-white">
+                  Save
+                </Button>
+                <Button onClick={() => setIsEditingWhatsapp(false)} variant="outline" className="bg-white text-black hover:bg-gray-100">
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                onClick={openWhatsappGroup}
+                className="bg-green-500 hover:bg-green-600 text-white font-semibold flex items-center space-x-2"
+              >
+                <MessageCircle className="h-4 w-4" />
+                <span>{whatsappLink ? "Open WhatsApp Group" : "Add WhatsApp Group"}</span>
+              </Button>
+            )}
+          </div>
+
           <div className="flex flex-wrap gap-2 md:space-x-3 w-full md:w-auto">
             <input type="file" accept=".csv" onChange={importFromCSV} style={{
             display: 'none'
