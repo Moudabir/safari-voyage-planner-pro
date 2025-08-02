@@ -184,7 +184,7 @@ const Home = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">Get support or share feedback</p>
-                <p className="font-semibold text-safari-green font-roboto">hello@safari-trips.com</p>
+                <p className="font-semibold text-safari-green font-roboto">Mo.moudabir@gmail.com</p>
               </CardContent>
             </Card>
 
