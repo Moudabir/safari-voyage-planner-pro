@@ -226,15 +226,15 @@ const Home = () => {
               <span className="text-lg font-bold text-safari-green font-roboto">Safari</span>
             </div>
             <div className="flex items-center space-x-6">
-              <a href="#" className="text-muted-foreground hover:text-safari-green transition-colors">
+              <button onClick={() => navigate("/privacy")} className="text-muted-foreground hover:text-safari-green transition-colors">
                 Privacy
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-safari-green transition-colors">
+              </button>
+              <button onClick={() => navigate("/terms")} className="text-muted-foreground hover:text-safari-green transition-colors">
                 Terms
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-safari-green transition-colors">
+              </button>
+              <button onClick={() => navigate("/support")} className="text-muted-foreground hover:text-safari-green transition-colors">
                 Support
-              </a>
+              </button>
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-border text-center">
