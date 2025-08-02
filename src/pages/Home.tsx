@@ -210,7 +210,7 @@ const Home = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">Come say hello in person</p>
-                <p className="font-semibold text-safari-green font-roboto">San Francisco, CA</p>
+                <p className="font-semibold text-safari-green font-roboto">Marrakech, MA</p>
               </CardContent>
             </Card>
           </div>
