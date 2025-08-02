@@ -45,7 +45,7 @@ const Home = () => {
     text: "Our group loved how transparent the budget tracking was. No more awkward money conversations!",
     rating: 5
   }];
-  return <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background font-roboto">
       {/* Navigation */}
       <nav className="bg-card border-b border-border sticky top-0 z-50 backdrop-blur-sm bg-background/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
