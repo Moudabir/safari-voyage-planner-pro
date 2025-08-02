@@ -197,7 +197,7 @@ const Home = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">Speak with our travel experts</p>
-                <p className="font-semibold text-safari-green font-roboto">+1 (555) 123-TRIP</p>
+                <p className="font-semibold text-safari-green font-roboto">Soon</p>
               </CardContent>
             </Card>
 
