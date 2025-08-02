@@ -107,7 +107,7 @@ const Auth = () => {
     }
   };
   const handleSubmit = mode === "signin" ? handleSignIn : handleSignUp;
-  return <div className="min-h-screen bg-background flex">
+  return <div className="min-h-screen bg-background flex font-sans">
       {/* Left Side - Safari Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-safari text-white p-12 flex-col justify-center relative overflow-hidden">
         <div className="absolute top-6 left-6">
