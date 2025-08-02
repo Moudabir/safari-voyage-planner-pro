@@ -217,7 +217,7 @@ const Index = () => {
                   <TripSelector trips={allTrips} currentTrip={currentTrip} onTripSelect={selectTrip} onTripsUpdate={refreshTrips} />
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={exportToCSV} className="cursor-pointer bg-gray-500 rounded-full">
+                <DropdownMenuItem onClick={exportToCSV} className="cursor-pointer rounded-full bg-cyan-100">
                   <Download className="h-4 w-4 mr-2" />
                   Export Data
                 </DropdownMenuItem>
