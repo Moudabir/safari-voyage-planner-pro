@@ -70,7 +70,7 @@ const Home = () => {
           <Badge className="mb-6 bg-white/20 text-white border-white/30 hover:bg-white/30">
             🎯 Your Ultimate Travel Companion
           </Badge>
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight font-roboto">
             Plan Your Perfect
             <span className="block text-safari-cream">Safari Adventure</span>
           </h1>
