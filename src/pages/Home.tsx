@@ -123,7 +123,7 @@ const Home = () => {
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-safari-green">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-safari-green font-roboto">
               Loved by Travelers Worldwide
             </h2>
             <p className="text-xl text-muted-foreground">
@@ -138,7 +138,7 @@ const Home = () => {
                     {[...Array(testimonial.rating)].map((_, i) => <Star key={i} className="h-5 w-5 text-safari-orange fill-current" />)}
                   </div>
                   <p className="text-muted-foreground mb-4 italic">"{testimonial.text}"</p>
-                  <p className="font-semibold text-safari-green">— {testimonial.name}</p>
+                  <p className="font-semibold text-safari-green font-roboto">— {testimonial.name}</p>
                 </CardContent>
               </Card>)}
           </div>
@@ -148,7 +148,7 @@ const Home = () => {
       {/* CTA Section */}
       <section className="bg-gradient-safari text-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 font-roboto">
             Ready to Plan Your Next Adventure?
           </h2>
           <p className="text-xl mb-8 opacity-90">
@@ -166,7 +166,7 @@ const Home = () => {
       <section className="py-20 px-4 bg-safari-cream/30">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-safari-green">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-safari-green font-roboto">
               Get in Touch
             </h2>
             <p className="text-xl text-muted-foreground">
@@ -184,7 +184,7 @@ const Home = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">Get support or share feedback</p>
-                <p className="font-semibold text-safari-green">hello@safari-trips.com</p>
+                <p className="font-semibold text-safari-green font-roboto">hello@safari-trips.com</p>
               </CardContent>
             </Card>
 
@@ -197,7 +197,7 @@ const Home = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">Speak with our travel experts</p>
-                <p className="font-semibold text-safari-green">+1 (555) 123-TRIP</p>
+                <p className="font-semibold text-safari-green font-roboto">+1 (555) 123-TRIP</p>
               </CardContent>
             </Card>
 
@@ -210,7 +210,7 @@ const Home = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">Come say hello in person</p>
-                <p className="font-semibold text-safari-green">San Francisco, CA</p>
+                <p className="font-semibold text-safari-green font-roboto">San Francisco, CA</p>
               </CardContent>
             </Card>
           </div>
@@ -223,7 +223,7 @@ const Home = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
               <img src={safariLogo} alt="Safari" className="h-8 w-8" />
-              <span className="text-lg font-bold text-safari-green">Safari</span>
+              <span className="text-lg font-bold text-safari-green font-roboto">Safari</span>
             </div>
             <div className="flex items-center space-x-6">
               <a href="#" className="text-muted-foreground hover:text-safari-green transition-colors">
