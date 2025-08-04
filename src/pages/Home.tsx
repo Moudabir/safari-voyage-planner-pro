@@ -45,10 +45,10 @@ const Home = () => {
     text: "Our group loved how transparent the budget tracking was. No more awkward money conversations!",
     rating: 5
   }];
-  return <div className="min-h-screen bg-background font-roboto">
+  return <div className="min-h-screen font-roboto bg-slate-200">
       {/* Navigation */}
-      <nav className="border-b border-border sticky top-0 z-50 backdrop-blur-sm bg-amber-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-amber-200">
+      <nav className="border-b border-border sticky top-0 z-50 backdrop-blur-sm mx-0 my-[10px] bg-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 bg-transparent lg:px-0">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
               <img src={safariLogo} alt="Safari" className="h-10 w-10" />
