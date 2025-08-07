@@ -98,10 +98,7 @@ const Home = () => {
               Start Planning Now
               <MapPin className="ml-3 h-6 w-6" />
             </Button>
-            <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 text-lg px-10 py-8 h-auto transition-all duration-300 hover:scale-105">
-              Watch Demo
-              <span className="ml-3 text-2xl">🎬</span>
-            </Button>
+            
           </div>
         </div>
       </section>
@@ -120,7 +117,9 @@ const Home = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => <Card key={index} className="group border-white/20 bg-white/10 backdrop-blur-md hover:bg-white/20 hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2 animate-fade-in" style={{animationDelay: `${index * 150}ms`}}>
+            {features.map((feature, index) => <Card key={index} className="group border-white/20 bg-white/10 backdrop-blur-md hover:bg-white/20 hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2 animate-fade-in" style={{
+            animationDelay: `${index * 150}ms`
+          }}>
                 <CardHeader>
                   <div className="flex items-center space-x-3">
                     <div className="p-3 bg-safari-green/20 backdrop-blur-sm rounded-xl group-hover:bg-safari-green/30 transition-all duration-300 group-hover:scale-110">
@@ -150,10 +149,14 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => <Card key={index} className="group border-white/20 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-500 hover:scale-105 animate-fade-in" style={{animationDelay: `${index * 200}ms`}}>
+            {testimonials.map((testimonial, index) => <Card key={index} className="group border-white/20 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-500 hover:scale-105 animate-fade-in" style={{
+            animationDelay: `${index * 200}ms`
+          }}>
                 <CardContent className="pt-6">
                   <div className="flex mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => <Star key={i} className="h-5 w-5 text-safari-orange fill-current animate-pulse" style={{animationDelay: `${i * 100}ms`}} />)}
+                    {[...Array(testimonial.rating)].map((_, i) => <Star key={i} className="h-5 w-5 text-safari-orange fill-current animate-pulse" style={{
+                  animationDelay: `${i * 100}ms`
+                }} />)}
                   </div>
                   <p className="text-muted-foreground mb-4 italic group-hover:text-foreground transition-colors duration-300">"{testimonial.text}"</p>
                   <div className="flex items-center space-x-3">
