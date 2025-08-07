@@ -86,7 +86,7 @@ const Home = () => {
             Plan Your Perfect
             <span className="block text-safari-cream relative">
               Safari Adventure
-              <div className="absolute -top-2 -right-8 text-4xl animate-spin">🧭</div>
+              
             </span>
           </h1>
           <p className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto opacity-90 animate-fade-in delay-300">
