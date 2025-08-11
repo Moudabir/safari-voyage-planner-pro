@@ -1,1 +1,4 @@
 project_id = "aaozkcjfxchwojpkzxsa"
+
+[functions.share-trip]
+verify_jwt = false
