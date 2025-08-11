@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Users, Banknote, Calendar, MapPin, Clock, Activity, MessageCircle, Download, Upload, LogOut, Menu } from "lucide-react";
+import { Users, Banknote, Calendar, MapPin, Clock, Activity, MessageCircle, Download, Upload, LogOut, Menu, Share2 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AttendeeTracker } from "@/components/AttendeeTracker";
 import { ExpenseTracker } from "@/components/ExpenseTracker";
@@ -20,6 +20,7 @@ import { useTrip } from "@/hooks/useTrip";
 import { useTabPersistence } from "@/hooks/useTabPersistence";
 import { useDataLoader } from "@/hooks/useDataLoader";
 import safariLogo from "@/assets/safari-logo.png";
+import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 const Index = () => {
   const [whatsappLink, setWhatsappLink] = useState("");
@@ -209,6 +210,29 @@ const Index = () => {
       setIsEditingWhatsapp(true);
     }
   };
+
+  const createShareLink = async () => {
+    if (!currentTrip || !user) return;
+    try {
+      const bytes = new Uint8Array(16);
+      window.crypto.getRandomValues(bytes);
+      const token = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+
+      const { error } = await supabase
+        .from('trip_shares')
+        .insert([{ trip_id: currentTrip.id, created_by: user.id, token }]);
+
+      if (error) throw error;
+
+      const url = `${window.location.origin}/share/${token}`;
+      await navigator.clipboard.writeText(url);
+      toast({ title: 'Share link copied', description: 'Send it to guests for a read-only view.' });
+    } catch (err) {
+      console.error('Share link error:', err);
+      toast({ title: 'Could not create share link', description: 'Please try again.', variant: 'destructive' });
+    }
+  };
+
   return <div className="min-h-screen bg-background font-roboto">
       {/* Header */}
     <div className="bg-gradient-safari text-white p-4 md:p-6 shadow-safari">
@@ -255,6 +279,11 @@ const Index = () => {
           }} id="csv-import" />
             
             <ThemeToggle />
+            
+            <Button onClick={createShareLink} className="bg-white text-safari-green hover:bg-white/90 font-semibold text-sm px-3 py-2 md:px-4 md:py-2">
+              <Share2 className="h-3 w-3 md:h-4 md:w-4 mr-2" />
+              Share
+            </Button>
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
