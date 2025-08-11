@@ -140,6 +140,48 @@ export type Database = {
           },
         ]
       }
+      trip_shares: {
+        Row: {
+          can_view_attendees: boolean
+          can_view_expenses: boolean
+          can_view_schedule: boolean
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          passcode_hash: string | null
+          revoked_at: string | null
+          token: string
+          trip_id: string
+        }
+        Insert: {
+          can_view_attendees?: boolean
+          can_view_expenses?: boolean
+          can_view_schedule?: boolean
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          passcode_hash?: string | null
+          revoked_at?: string | null
+          token: string
+          trip_id: string
+        }
+        Update: {
+          can_view_attendees?: boolean
+          can_view_expenses?: boolean
+          can_view_schedule?: boolean
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          passcode_hash?: string | null
+          revoked_at?: string | null
+          token?: string
+          trip_id?: string
+        }
+        Relationships: []
+      }
       trips: {
         Row: {
           created_at: string
