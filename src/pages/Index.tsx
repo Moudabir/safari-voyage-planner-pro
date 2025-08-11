@@ -233,6 +233,29 @@ const Index = () => {
     }
   };
 
+  const shareViaWhatsapp = async () => {
+    if (!currentTrip || !user) return;
+    try {
+      const bytes = new Uint8Array(16);
+      window.crypto.getRandomValues(bytes);
+      const token = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+
+      const { error } = await supabase
+        .from('trip_shares')
+        .insert([{ trip_id: currentTrip.id, created_by: user.id, token }]);
+
+      if (error) throw error;
+
+      const url = `${window.location.origin}/share/${token}`;
+      const text = `You're invited to view our trip: ${url}`;
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(waUrl, '_blank');
+    } catch (err) {
+      console.error('WhatsApp share error:', err);
+      toast({ title: 'Could not share via WhatsApp', description: 'Please try again.', variant: 'destructive' });
+    }
+  };
+
   return <div className="min-h-screen bg-background font-roboto">
       {/* Header */}
     <div className="bg-gradient-safari text-white p-4 md:p-6 shadow-safari">
@@ -280,10 +303,18 @@ const Index = () => {
             
             <ThemeToggle />
             
-            <Button onClick={createShareLink} className="bg-white text-safari-green hover:bg-white/90 font-semibold text-sm px-3 py-2 md:px-4 md:py-2">
-              <Share2 className="h-3 w-3 md:h-4 md:w-4 mr-2" />
-              Share
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="bg-white text-safari-green hover:bg-white/90 font-semibold text-sm px-3 py-2 md:px-4 md:py-2">
+                  <Share2 className="h-3 w-3 md:h-4 md:w-4 mr-2" />
+                  Share
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 bg-white">
+                <DropdownMenuItem onClick={createShareLink} className="cursor-pointer">Copy link</DropdownMenuItem>
+                <DropdownMenuItem onClick={shareViaWhatsapp} className="cursor-pointer">Send via WhatsApp</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
