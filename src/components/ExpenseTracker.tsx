@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,6 +28,15 @@ interface Attendee {
   name: string;
   email?: string;
   phone?: string;
+}
+
+interface ExpensePayer {
+  id: string;
+  expense_id: string;
+  attendee_id: string | null;
+  payer_name: string;
+  amount: number;
+  created_at: string;
 }
 
 interface ExpenseTrackerProps {
@@ -89,6 +99,34 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
   const { toast } = useToast();
   const { user } = useAuth();
 
+  // Multiple payers state
+  const [payersByExpense, setPayersByExpense] = useState<Record<string, ExpensePayer[]>>({});
+  const [newPayers, setNewPayers] = useState<Record<string, { name: string; amount: string }>>({});
+  const [editPayers, setEditPayers] = useState<Record<string, { name: string; amount: string }>>({});
+
+  // Helpers
+  const splitEqually = (map: Record<string, { name: string; amount: string }>, total: number) => {
+    const keys = Object.keys(map);
+    if (keys.length === 0) return map;
+    const per = Math.floor((total / keys.length) * 100) / 100; // 2 decimals
+    const adjusted = { ...map };
+    let running = 0;
+    keys.forEach((k, i) => {
+      if (i === keys.length - 1) {
+        const last = (total - running).toFixed(2);
+        adjusted[k] = { ...adjusted[k], amount: last };
+      } else {
+        adjusted[k] = { ...adjusted[k], amount: per.toFixed(2) };
+        running += per;
+      }
+    });
+    return adjusted;
+  };
+
+  const sumMap = (map: Record<string, { name: string; amount: string }>) =>
+    Object.values(map).reduce((s, v) => s + (parseFloat(v.amount || '0') || 0), 0);
+
+
   useEffect(() => {
     if (tripId && user) {
       loadExpenses();
@@ -98,16 +136,34 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
   const loadExpenses = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data: exp, error: expErr } = await supabase
         .from('expenses')
         .select('*')
         .eq('trip_id', tripId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (expErr) throw expErr;
+      setExpenses(exp);
 
-      setExpenses(data);
+      if (exp.length > 0) {
+        const ids = exp.map(e => e.id);
+        const { data: payers, error: payErr } = await (supabase as any)
+          .from('expense_payers')
+          .select('*')
+          .in('expense_id', ids);
+        if (payErr) throw payErr;
+        const map: Record<string, ExpensePayer[]> = {};
+        const payersArr = (payers || []) as ExpensePayer[];
+        payersArr.forEach((p) => {
+          if (!map[p.expense_id]) map[p.expense_id] = [];
+          map[p.expense_id].push(p);
+        });
+        setPayersByExpense(map);
+      } else {
+        setPayersByExpense({});
+      }
     } catch (error: any) {
+      console.error('Failed to load expenses:', error);
       toast({
         title: "Error",
         description: "Failed to load expenses",
@@ -119,20 +175,33 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
   };
 
   const handleAddExpense = async () => {
-    if (!newExpense.amount || !newExpense.description || !newExpense.paid_by || !user) return;
+    if (!newExpense.amount || !newExpense.description || !user) return;
+
+    const total = parseFloat(newExpense.amount);
+    const selectedIds = Object.keys(newPayers);
+    if (selectedIds.length === 0) {
+      toast({ title: 'Select payers', description: 'Choose at least one payer.', variant: 'destructive' });
+      return;
+    }
+    const assigned = sumMap(newPayers);
+    if (Math.abs(assigned - total) > 0.01) {
+      toast({ title: 'Amounts do not match', description: 'Sum of payer amounts must equal total.', variant: 'destructive' });
+      return;
+    }
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      const paidByLabel = selectedIds.length === 1 ? newPayers[selectedIds[0]].name : 'Multiple';
+      const { data: exp, error } = await supabase
         .from('expenses')
         .insert([
           {
             trip_id: tripId,
             user_id: user.id,
             category: newExpense.category,
-            amount: parseFloat(newExpense.amount),
+            amount: total,
             description: newExpense.description,
-            paid_by: newExpense.paid_by
+            paid_by: paidByLabel
           }
         ])
         .select()
@@ -140,24 +209,25 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
 
       if (error) throw error;
 
-      setExpenses([data, ...expenses]);
-      setNewExpense({
-        category: 'food',
-        amount: '',
-        description: '',
-        paid_by: ''
-      });
+      const rows = selectedIds.map((id) => ({
+        expense_id: exp.id,
+        attendee_id: id,
+        payer_name: newPayers[id].name,
+        amount: parseFloat(newPayers[id].amount)
+      }));
+      const { error: payErr } = await (supabase as any).from('expense_payers').insert(rows);
+      if (payErr) throw payErr;
+
+      setExpenses([exp, ...expenses]);
+      setPayersByExpense((prev) => ({ ...prev, [exp.id]: rows.map((r, i) => ({ ...r, id: `${exp.id}-${i}`, created_at: new Date().toISOString() })) as ExpensePayer[] }));
+
+      setNewExpense({ category: 'food', amount: '', description: '', paid_by: '' });
+      setNewPayers({});
       setIsAddingExpense(false);
-      toast({
-        title: "Expense Added",
-        description: `${data.amount} DH added to ${data.category} expenses.`
-      });
+      toast({ title: 'Expense Added', description: `${exp.amount} DH added to ${exp.category} expenses.` });
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      console.error(error);
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -196,6 +266,11 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
       description: expense.description,
       paid_by: expense.paid_by
     });
+    // Init edit payers from existing
+    const current = payersByExpense[expense.id] || [];
+    const map: Record<string, { name: string; amount: string }> = {};
+    current.forEach(p => { if (p.attendee_id) map[p.attendee_id] = { name: p.payer_name, amount: p.amount.toString() }; });
+    setEditPayers(map);
     setIsEditingExpense(true);
   };
 
@@ -312,21 +387,63 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
                 />
               </div>
               <div>
-                <Label htmlFor="paid_by">Paid By</Label>
-                <Select value={newExpense.paid_by} onValueChange={(value) => 
-                  setNewExpense({...newExpense, paid_by: value})
-                }>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select who paid" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {attendees.map((attendee) => (
-                      <SelectItem key={attendee.id} value={attendee.name}>
-                        {attendee.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center justify-between">
+                  <Label>Paid By (select multiple)</Label>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      const total = parseFloat(newExpense.amount || '0') || 0;
+                      setNewPayers(prev => splitEqually(prev, total));
+                    }}
+                  >
+                    Split equally
+                  </Button>
+                </div>
+                <div className="mt-2 space-y-2 max-h-56 overflow-auto pr-1">
+                  {attendees.map((attendee) => {
+                    const selected = !!newPayers[attendee.id];
+                    return (
+                      <div key={attendee.id} className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id={`payer-${attendee.id}`}
+                            checked={selected}
+                            onCheckedChange={(checked) => {
+                              setNewPayers(prev => {
+                                const next = { ...prev };
+                                if (checked) {
+                                  next[attendee.id] = { name: attendee.name, amount: next[attendee.id]?.amount || '' };
+                                } else {
+                                  delete next[attendee.id];
+                                }
+                                return next;
+                              });
+                            }}
+                          />
+                          <Label htmlFor={`payer-${attendee.id}`}>{attendee.name}</Label>
+                        </div>
+                        <Input
+                          className="w-28"
+                          type="number"
+                          placeholder="0.00"
+                          value={newPayers[attendee.id]?.amount || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setNewPayers(prev => ({
+                              ...prev,
+                              [attendee.id]: { name: attendee.name, amount: val }
+                            }));
+                          }}
+                          disabled={!selected}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Total assigned: {sumMap(newPayers).toFixed(2)} / {parseFloat(newExpense.amount || '0').toFixed(2)} DH
+                </p>
               </div>
               <Button 
                 onClick={handleAddExpense} 
@@ -397,7 +514,10 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({
                       <div>
                         <p className="font-medium">{expense.description}</p>
                          <p className="text-sm text-muted-foreground">
-                           {expense.category} • Paid by {expense.paid_by} • {expense.created_at.split('T')[0]}
+                           {expense.category} • {payersByExpense[expense.id]?.length
+                             ? `Paid by ${payersByExpense[expense.id].map(p => `${p.payer_name} (${p.amount} DH)`).join(', ')}`
+                             : `Paid by ${expense.paid_by}`
+                           } • {expense.created_at.split('T')[0]}
                          </p>
                       </div>
                     </div>
