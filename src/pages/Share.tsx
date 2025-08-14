@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import safariLogo from "@/assets/safari-logo.png";
 
 interface ShareData {
   tripId: string;
@@ -69,125 +70,158 @@ const Share = () => {
   const totalExpenses = data.expenses.reduce((sum, e: any) => sum + Number(e.amount || 0), 0);
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="p-6 border-b">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Shared Trip Overview</h1>
-          <Badge>Read-only</Badge>
+    <div className="min-h-screen bg-safari-cream/30 font-roboto">
+      <header className="bg-card border-b border-safari-sand shadow-sm">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <img src={safariLogo} alt="Safari" className="h-8 w-8" />
+            <span className="text-xl font-bold text-safari-green">Safari</span>
+          </div>
+          <Badge variant="outline" className="border-safari-green text-safari-green">Read-only</Badge>
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto p-6 space-y-6">
+        {/* Hero Section */}
+        <Card className="bg-gradient-safari text-white border-safari-green">
+          <CardContent className="p-8 text-center">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">Shared Trip Overview</h1>
+            <p className="text-safari-cream/90">View the latest details for this amazing adventure</p>
+          </CardContent>
+        </Card>
+
+        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Attendees</CardTitle>
+          <Card className="border-safari-sand bg-gradient-to-br from-card to-safari-cream/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-safari-green">Attendees</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">{data.attendees.length}</p>
+              <p className="text-3xl font-bold text-safari-green">{data.attendees.length}</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Total Expenses</CardTitle>
+          <Card className="border-safari-sand bg-gradient-to-br from-card to-safari-cream/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-safari-green">Total Expenses</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">{totalExpenses} DH</p>
+              <p className="text-3xl font-bold text-safari-orange">{totalExpenses} DH</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Schedule Items</CardTitle>
+          <Card className="border-safari-sand bg-gradient-to-br from-card to-safari-cream/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-safari-green">Schedule Items</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">{data.schedule.length}</p>
+              <p className="text-3xl font-bold text-safari-brown">{data.schedule.length}</p>
             </CardContent>
           </Card>
         </div>
 
-        <Card>
+        {/* Schedule Section */}
+        <Card className="border-safari-sand bg-gradient-to-br from-card to-safari-cream/50">
           <CardHeader>
-            <CardTitle>Upcoming Schedule</CardTitle>
+            <CardTitle className="text-safari-green">Upcoming Schedule</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2">
-              {data.schedule.map((s: any) => (
-                <li key={s.id} className="text-sm flex justify-between">
-                  <span className="font-medium">{s.title}</span>
-                  <span className="text-muted-foreground">{s.date}{s.time ? ` • ${s.time}` : ''}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Expense Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {data.expenses.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Payers</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data.expenses.map((expense: any) => (
-                    <TableRow key={expense.id}>
-                      <TableCell className="font-medium">{expense.description}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{expense.category}</Badge>
-                      </TableCell>
-                      <TableCell>{expense.amount} DH</TableCell>
-                      <TableCell>
-                        {expense.payers && expense.payers.length > 0 ? (
-                          <div className="space-y-1">
-                            {expense.payers.map((payer: any, index: number) => (
-                              <div key={index} className="text-sm">
-                                <span className="font-medium">{payer.payer_name}</span>: {payer.amount} DH
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">{expense.paid_by}</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            {data.schedule.length > 0 ? (
+              <ul className="space-y-3">
+                {data.schedule.map((s: any) => (
+                  <li key={s.id} className="flex justify-between items-center p-3 bg-white/50 rounded-lg border border-safari-sand">
+                    <span className="font-medium text-safari-green">{s.title}</span>
+                    <span className="text-safari-brown text-sm">{s.date}{s.time ? ` • ${s.time}` : ''}</span>
+                  </li>
+                ))}
+              </ul>
             ) : (
-              <p className="text-muted-foreground text-center py-4">No expenses recorded yet.</p>
+              <p className="text-muted-foreground text-center py-4">No schedule items yet.</p>
             )}
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Expense Details Section */}
+        <Card className="border-safari-sand bg-gradient-to-br from-card to-safari-cream/50">
           <CardHeader>
-            <CardTitle>Attendees</CardTitle>
+            <CardTitle className="text-safari-green">Expense Details</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {data.attendees.map((a: any) => (
-                <li key={a.id} className="text-sm">{a.name}</li>
-              ))}
-            </ul>
+            {data.expenses.length > 0 ? (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-safari-sand">
+                      <TableHead className="text-safari-green font-semibold">Description</TableHead>
+                      <TableHead className="text-safari-green font-semibold">Category</TableHead>
+                      <TableHead className="text-safari-green font-semibold">Amount</TableHead>
+                      <TableHead className="text-safari-green font-semibold">Payers</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {data.expenses.map((expense: any) => (
+                      <TableRow key={expense.id} className="border-safari-sand hover:bg-safari-cream/30">
+                        <TableCell className="font-medium text-safari-green">{expense.description}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="border-safari-orange text-safari-orange">
+                            {expense.category}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-bold text-safari-orange">{expense.amount} DH</TableCell>
+                        <TableCell>
+                          {expense.payers && expense.payers.length > 0 ? (
+                            <div className="space-y-1">
+                              {expense.payers.map((payer: any, index: number) => (
+                                <div key={index} className="text-sm bg-white/50 p-2 rounded border border-safari-sand">
+                                  <span className="font-medium text-safari-green">{payer.payer_name}</span>: 
+                                  <span className="text-safari-orange font-semibold ml-1">{payer.amount} DH</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-sm text-safari-brown bg-white/50 p-2 rounded border border-safari-sand">
+                              {expense.paid_by}
+                            </span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-8">No expenses recorded yet.</p>
+            )}
           </CardContent>
         </Card>
 
-        <Card className="bg-primary/5 border-primary/20">
-          <CardContent className="p-6 text-center">
-            <p className="text-lg mb-4 text-foreground">
+        {/* Attendees Section */}
+        <Card className="border-safari-sand bg-gradient-to-br from-card to-safari-cream/50">
+          <CardHeader>
+            <CardTitle className="text-safari-green">Attendees</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {data.attendees.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {data.attendees.map((a: any) => (
+                  <div key={a.id} className="bg-white/50 p-3 rounded-lg border border-safari-sand">
+                    <span className="text-safari-green font-medium">{a.name}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">No attendees yet.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Call to Action */}
+        <Card className="bg-gradient-safari text-white border-safari-green shadow-safari">
+          <CardContent className="p-8 text-center">
+            <h2 className="text-2xl font-bold mb-4">
               Want to be the manager of your own trips? Sign up and start planning!
-            </p>
-            <Button asChild>
+            </h2>
+            <Button asChild size="lg" className="bg-white text-safari-green hover:bg-white/90 font-semibold">
               <Link to="/auth">Get Started</Link>
             </Button>
           </CardContent>
