@@ -47,9 +47,9 @@ const Home = () => {
   }];
   return <div className="min-h-screen font-roboto bg-slate-200">
       {/* Navigation */}
-      <nav className="border-b border-border sticky top-0 z-50 backdrop-blur-sm mx-0 my-[10px] bg-transparent">
+      <nav className="border-b border-border sticky top-0 z-50 backdrop-blur-sm mx-0 my-[10px] bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 bg-transparent lg:px-0">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-16 bg-slate-50">
             <div className="flex items-center space-x-3">
               <img src={safariLogo} alt="Safari" className="h-10 w-10" />
               
