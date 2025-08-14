@@ -9,6 +9,7 @@ export interface Trip {
   name: string;
   created_at: string;
   updated_at: string;
+  whatsapp_link?: string;
 }
 
 export const useTrip = () => {

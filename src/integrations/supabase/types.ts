@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -48,6 +48,48 @@ export type Database = {
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_payers: {
+        Row: {
+          amount: number
+          attendee_id: string | null
+          created_at: string
+          expense_id: string
+          id: string
+          payer_name: string
+        }
+        Insert: {
+          amount: number
+          attendee_id?: string | null
+          created_at?: string
+          expense_id: string
+          id?: string
+          payer_name: string
+        }
+        Update: {
+          amount?: number
+          attendee_id?: string | null
+          created_at?: string
+          expense_id?: string
+          id?: string
+          payer_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_payers_attendee_id_fkey"
+            columns: ["attendee_id"]
+            isOneToOne: false
+            referencedRelation: "attendees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_payers_expense_id_fkey"
+            columns: ["expense_id"]
+            isOneToOne: false
+            referencedRelation: "expenses"
             referencedColumns: ["id"]
           },
         ]
@@ -189,6 +231,7 @@ export type Database = {
           name: string
           updated_at: string
           user_id: string
+          whatsapp_link: string | null
         }
         Insert: {
           created_at?: string
@@ -196,6 +239,7 @@ export type Database = {
           name?: string
           updated_at?: string
           user_id: string
+          whatsapp_link?: string | null
         }
         Update: {
           created_at?: string
@@ -203,6 +247,7 @@ export type Database = {
           name?: string
           updated_at?: string
           user_id?: string
+          whatsapp_link?: string | null
         }
         Relationships: []
       }
