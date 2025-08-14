@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 interface ShareData {
   tripId: string;
@@ -177,6 +179,17 @@ const Share = () => {
                 <li key={a.id} className="text-sm">{a.name}</li>
               ))}
             </ul>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="p-6 text-center">
+            <p className="text-lg mb-4 text-foreground">
+              Want to be the manager of your own trips? Sign up and start planning!
+            </p>
+            <Button asChild>
+              <Link to="/auth">Get Started</Link>
+            </Button>
           </CardContent>
         </Card>
       </main>
