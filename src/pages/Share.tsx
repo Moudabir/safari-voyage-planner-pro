@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface ShareData {
   tripId: string;
@@ -117,6 +118,52 @@ const Share = () => {
                 </li>
               ))}
             </ul>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Expense Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {data.expenses.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Payers</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.expenses.map((expense: any) => (
+                    <TableRow key={expense.id}>
+                      <TableCell className="font-medium">{expense.description}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{expense.category}</Badge>
+                      </TableCell>
+                      <TableCell>{expense.amount} DH</TableCell>
+                      <TableCell>
+                        {expense.payers && expense.payers.length > 0 ? (
+                          <div className="space-y-1">
+                            {expense.payers.map((payer: any, index: number) => (
+                              <div key={index} className="text-sm">
+                                <span className="font-medium">{payer.payer_name}</span>: {payer.amount} DH
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">{expense.paid_by}</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">No expenses recorded yet.</p>
+            )}
           </CardContent>
         </Card>
 
