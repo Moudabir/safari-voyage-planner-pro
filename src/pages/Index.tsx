@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { SEOHead } from "@/components/SEOHead";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -271,7 +272,14 @@ const Index = () => {
     }
   };
 
-  return <div className="min-h-screen bg-background font-roboto">
+  return <>
+    <SEOHead 
+      title={`${currentTrip?.name || 'My Trip'} - Safari Travel Dashboard | Manage Your Adventure`}
+      description="Manage your travel plans with Safari's intelligent dashboard. Track attendees, manage budgets, create schedules and organize every detail of your group adventure."
+      keywords="travel dashboard, trip management, group travel organizer, budget tracker, itinerary manager, safari planning tool"
+      canonicalUrl="https://safari-voyage-planner-pro.lovable.app/dashboard"
+    />
+    <div className="min-h-screen bg-background font-roboto">
       {/* Header */}
     <div className="bg-gradient-safari text-white p-4 md:p-6 shadow-safari">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
@@ -521,6 +529,7 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>;
+    </div>
+  </>;
 };
 export default Index;

@@ -1,8 +1,20 @@
 User-agent: Googlebot
 Allow: /
+Allow: /auth
+Allow: /privacy
+Allow: /terms
+Allow: /support
+Disallow: /dashboard
+Disallow: /share/
 
 User-agent: Bingbot
 Allow: /
+Allow: /auth
+Allow: /privacy
+Allow: /terms
+Allow: /support
+Disallow: /dashboard
+Disallow: /share/
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +24,15 @@ Allow: /
 
 User-agent: *
 Allow: /
+Allow: /auth
+Allow: /privacy
+Allow: /terms
+Allow: /support
+Disallow: /dashboard
+Disallow: /share/
+
+# Sitemap
+Sitemap: https://safari-voyage-planner-pro.lovable.app/sitemap.xml
+
+# Crawl-delay for all bots
+Crawl-delay: 1

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, MapPin, Banknote, Calendar, Globe, Shield, Zap, Star, Mail, Phone, MapIcon } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SEOHead } from "@/components/SEOHead";
 import { useNavigate } from "react-router-dom";
 import safariLogo from "@/assets/safari-logo.png";
 const Home = () => {
@@ -45,18 +46,31 @@ const Home = () => {
     text: "Our group loved how transparent the budget tracking was. No more awkward money conversations!",
     rating: 5
   }];
-  return <div className="min-h-screen font-roboto bg-slate-200">
+  return <>
+    <SEOHead 
+      title="Safari - Ultimate Travel Planning & Group Trip Organizer | Plan Your Perfect Adventure"
+      description="Plan perfect group adventures with Safari's intelligent travel planner. Track attendees, manage budgets, create itineraries & organize group trips effortlessly. Start planning your dream safari today!"
+      keywords="travel planning, group trips, safari planning, trip organizer, budget tracker, itinerary planner, adventure travel, travel app, group travel, vacation planner, Morocco travel, group adventure"
+      canonicalUrl="https://safari-voyage-planner-pro.lovable.app/"
+    />
+    <div className="min-h-screen font-roboto bg-slate-200">
       {/* Navigation */}
-      <nav className="border-b border-border sticky top-0 z-50 backdrop-blur-sm mx-0 my-[10px] bg-slate-50">
+      <nav className="border-b border-border sticky top-0 z-50 backdrop-blur-sm mx-0 my-[10px] bg-slate-50" role="navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 bg-transparent lg:px-0">
           <div className="flex justify-between items-center h-16 bg-slate-50">
             <div className="flex items-center space-x-3">
-              <img src={safariLogo} alt="Safari" className="h-10 w-10" />
+              <img 
+                src={safariLogo} 
+                alt="Safari Travel Planner - Plan Your Perfect Adventure" 
+                className="h-10 w-10"
+                width="40"
+                height="40"
+              />
               
             </div>
             <div className="flex items-center space-x-4">
               <ThemeToggle />
-              <Button onClick={() => navigate("/auth")} className="bg-safari-green hover:bg-safari-green/90 text-white">
+              <Button onClick={() => navigate("/auth")} className="bg-safari-green hover:bg-safari-green/90 text-white" aria-label="Get started with Safari travel planning">
                 Get Started
               </Button>
             </div>
@@ -65,7 +79,7 @@ const Home = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="bg-gradient-safari text-white py-20 px-4">
+      <header className="bg-gradient-safari text-white py-20 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <Badge className="mb-6 bg-white/20 text-white border-white/30 hover:bg-white/30">Your Ultimate Travel Companion</Badge>
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight font-roboto">
@@ -84,7 +98,7 @@ const Home = () => {
             
           </div>
         </div>
-      </section>
+      </header>
 
       {/* Features Section */}
       <section className="py-20 px-4 bg-safari-cream/30">
@@ -216,24 +230,42 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-card border-t border-border py-12 px-4">
+      <footer className="bg-card border-t border-border py-12 px-4" role="contentinfo">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
-              <img src={safariLogo} alt="Safari" className="h-8 w-8" />
+              <img 
+                src={safariLogo} 
+                alt="Safari Travel Planner Logo" 
+                className="h-8 w-8"
+                width="32"
+                height="32"
+              />
               <span className="text-lg font-bold text-safari-green font-roboto">Safari</span>
             </div>
-            <div className="flex items-center space-x-6">
-              <button onClick={() => navigate("/privacy")} className="text-muted-foreground hover:text-safari-green transition-colors">
+            <nav className="flex items-center space-x-6" role="navigation" aria-label="Footer navigation">
+              <button 
+                onClick={() => navigate("/privacy")} 
+                className="text-muted-foreground hover:text-safari-green transition-colors"
+                aria-label="View privacy policy"
+              >
                 Privacy
               </button>
-              <button onClick={() => navigate("/terms")} className="text-muted-foreground hover:text-safari-green transition-colors">
+              <button 
+                onClick={() => navigate("/terms")} 
+                className="text-muted-foreground hover:text-safari-green transition-colors"
+                aria-label="View terms of service"
+              >
                 Terms
               </button>
-              <button onClick={() => navigate("/support")} className="text-muted-foreground hover:text-safari-green transition-colors">
+              <button 
+                onClick={() => navigate("/support")} 
+                className="text-muted-foreground hover:text-safari-green transition-colors"
+                aria-label="Get support"
+              >
                 Support
               </button>
-            </div>
+            </nav>
           </div>
           <div className="mt-8 pt-8 border-t border-border text-center">
             <p className="text-muted-foreground">
@@ -242,6 +274,7 @@ const Home = () => {
           </div>
         </div>
       </footer>
-    </div>;
+    </div>
+  </>;
 };
 export default Home;
