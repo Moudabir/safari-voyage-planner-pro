@@ -275,11 +275,52 @@ const Index = () => {
       {/* Header */}
     <div className="bg-gradient-safari text-white p-4 md:p-6 shadow-safari">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 flex-1">
             <div>
               <img src={safariLogo} alt="Safari" className="h-16 md:h-20 mb-1 md:mb-2" />
               <p className="text-sm md:text-lg opacity-90">Your Ultimate Travel Companion</p>
               <p className="text-xs md:text-sm opacity-75">Welcome back, {user.email}</p>
+            </div>
+            
+            {/* WhatsApp Group Button in Header */}
+            <div className="ml-8">
+              {isEditingWhatsapp ? (
+                <div className="flex items-center space-x-2">
+                  <Input
+                    placeholder="Enter WhatsApp group link"
+                    className="bg-white text-black placeholder:text-gray-500 min-w-[200px]"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleWhatsappSave(e.currentTarget.value);
+                      }
+                    }}
+                  />
+                  <Button 
+                    onClick={(e) => {
+                      const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                      handleWhatsappSave(input.value);
+                    }}
+                    className="bg-success text-success-foreground hover:bg-success/80"
+                  >
+                    Save
+                  </Button>
+                  <Button 
+                    onClick={() => setIsEditingWhatsapp(false)} 
+                    variant="outline" 
+                    className="bg-white text-black hover:bg-gray-100"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <Button 
+                  onClick={openWhatsappGroup}
+                  className="bg-success text-success-foreground hover:bg-success/80 font-semibold flex items-center space-x-2"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  <span>{currentTrip?.whatsapp_link ? "WhatsApp Group" : "Add WhatsApp Group"}</span>
+                </Button>
+              )}
             </div>
           </div>
           
@@ -304,47 +345,6 @@ const Index = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* WhatsApp Group Button */}
-            {isEditingWhatsapp ? (
-              <div className="flex items-center space-x-2">
-                <Input
-                  placeholder="Enter WhatsApp group link"
-                  className="bg-white text-black placeholder:text-gray-500 min-w-[200px]"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleWhatsappSave(e.currentTarget.value);
-                    }
-                  }}
-                />
-                <Button 
-                  onClick={(e) => {
-                    const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                    handleWhatsappSave(input.value);
-                  }}
-                  className="bg-success text-success-foreground hover:bg-success/80"
-                >
-                  Save
-                </Button>
-                <Button 
-                  onClick={() => setIsEditingWhatsapp(false)} 
-                  variant="outline" 
-                  className="bg-white text-black hover:bg-gray-100"
-                >
-                  Cancel
-                </Button>
-              </div>
-            ) : (
-              <Button 
-                onClick={openWhatsappGroup}
-                className="bg-success text-success-foreground hover:bg-success/80 font-semibold flex items-center space-x-2"
-              >
-                <MessageCircle className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden sm:inline">
-                  {currentTrip?.whatsapp_link ? "WhatsApp Group" : "Add WhatsApp"}
-                </span>
-                <span className="sm:hidden">WA</span>
-              </Button>
-            )}
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
