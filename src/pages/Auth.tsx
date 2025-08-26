@@ -222,7 +222,7 @@ const Auth = () => {
               <img src={safariLogo} alt="Safari" className="h-8 w-8" />
               <span className="text-lg font-bold text-safari-green">Safari Trip Planner</span>
             </div>
-            <p className="text-foreground text-sm">chi ssafra zia 78ha wri95ha</p>
+            <p className="text-foreground text-sm">chi tsafra 3la 79ha wtri9ha</p>
           </div>
         </div>
       </div>
